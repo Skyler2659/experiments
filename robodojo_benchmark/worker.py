@@ -15,6 +15,7 @@ import time
 import uuid
 from .catalog import ROOT, read, layout_path, asset_revision
 from .campaign import write
+from .results import native_result, saved_native_result
 
 
 def runtime_config(path):
@@ -172,17 +173,6 @@ def prepare_files(episode, job, runtime=None):
     write(episode / "task/representation.json", {"representation": representation, "gt_mode": job["gt_mode"]})
 
 
-def native_result(path, layout_id):
-    result = read(path)
-    details = list(result.get("details", {}).values())
-    if len(details) != 1 or details[0].get("layout_id") != layout_id:
-        raise ValueError("Native result does not contain exactly the requested layout")
-    d = details[0]
-    if type(d.get("success")) is not bool or type(d.get("score")) not in (int, float) or not 0 <= d["score"] <= 1:
-        raise ValueError("Malformed native success/score")
-    return {"official_success": d["success"], "score_0_100": float(d["score"]) * 100,
-            "native_result": str(Path(path).resolve()), "layout_id": layout_id}
-
 
 def run_ours(attempt, runtime, spec, job, env, *, probe=False):
     from .reconstruct import reconstruct, ReconstructionFailure
@@ -197,7 +187,8 @@ def run_ours(attempt, runtime, spec, job, env, *, probe=False):
                 "representation": job["representation"], "gt_mode": job["gt_mode"], "run_id": env["ROBODOJO_RUN_ID"],
                 "evaluator_directory": str(evaluator), "full_arm_collision_check": True, "motion_profile": "ruckig",
                 "preparation_timeout_s": spec["reconstruction"]["wall_timeout_s"] + 300,
-                "probe_native_only": probe, "max_settle_actions": 4}
+                "probe_native_only": probe, "max_settle_actions": 4,
+                "episode_preparer": "robodojo_benchmark.sim_hooks:prepare_episode"}
     if reuse and job['representation'] == 'ground_truth':
         settings['reuse_gt_episode'] = str(reuse / 'episode')
     settings['renderer_gpu'] = int(runtime.get('renderer_gpu', env['CUDA_VISIBLE_DEVICES']))
@@ -234,7 +225,8 @@ def run_ours(attempt, runtime, spec, job, env, *, probe=False):
                 with fresh_codex_home(runtime) as codex_home:
                     transport = {"episode": str(episode), "python": runtime["control_python"], "benchmark_protocol": "robodojo-v1",
                                  "representation": job["representation"], "gt_mode": job["gt_mode"], "codex_home": codex_home,
-                                 "agent_timeout_s": spec["agent"]["wall_timeout_s"]}
+                                 "agent_timeout_s": spec["agent"]["wall_timeout_s"],
+                                 "instruction_transform": "robodojo_benchmark.instructions:agent_instructions"}
                     write(attempt / "transport.json", transport)
                     command = [runtime["control_python"], "-m", "codeworld_robot.agent_cli", "run", "--config", str(attempt / "transport.json"),
                                "--run-dir", str(attempt / "agent"), "--model", spec["agent"]["model"],
@@ -252,10 +244,8 @@ def run_ours(attempt, runtime, spec, job, env, *, probe=False):
                 result["agent_lifecycle"] = life
                 if life.get("termination_reason") == "wall_timeout":
                     result["termination"] = "agent_wall_budget"
-                elif life['status'] == 'STOPPED':
-                    result['status'] = 'INTERRUPTED'
-                elif life["status"] == "FAILED" or life.get("exit_code", 0) not in (0, None):
-                    result["status"] = "INFRA_ERROR"
+                elif life['status'] in ('STOPPED', 'FAILED') or life.get('exit_code', 0) not in (0, None):
+                    result['agent_error'] = 'Agent stopped or failed; finalized native score retained'
             return result
         except ReconstructionFailure:
             return {"status": "METHOD_FAILURE", "official_success": None, "score_0_100": None,
@@ -330,9 +320,19 @@ def execute_job(campaign, job, runtime, gpu, *, probe=False):
     try:
         actual_assets = asset_revision(runtime['robodojo_root'])
         expected_assets = campaign.manifest.get('platform_sources', {}).get('Assets', {}).get('commit')
-        write(attempt / 'source_versions.json', {'upstreams':campaign.manifest['upstreams'],
+        from .provenance import archive_sources, upstream_state
+        framework = archive_sources(ROOT, campaign.root)
+        actual_upstreams = {name: upstream_state(runtime.get(key, ROOT / 'vendor' / name), pin['commit'])
+                            for name, key in (('RoboDojo', 'robodojo_root'), ('RoboProbe', 'roboprobe_root'),
+                                              ('RecursiveCWM', 'recursivecwm_root'))
+                            if (pin := campaign.manifest['upstreams'].get(name))}
+        write(attempt / 'source_versions.json', {'framework': framework, 'actual_upstreams': actual_upstreams,
+              'upstreams':campaign.manifest['upstreams'],
               'platform_sources':campaign.manifest.get('platform_sources', {}),
               'observed_assets_revision':actual_assets})
+        for name, observed in actual_upstreams.items():
+            if observed['errors']:
+                raise RuntimeError(name + ': ' + '; '.join(observed['errors']))
         if expected_assets and actual_assets and expected_assets != actual_assets:
             raise RuntimeError(f'Native Assets revision differs from the campaign: {actual_assets} != {expected_assets}')
         layout = layout_path(runtime["robodojo_root"], job)
@@ -348,6 +348,16 @@ def execute_job(campaign, job, runtime, gpu, *, probe=False):
         status = "UNSTABLE" if server_error.get("exception_type") in ("UnStableError", "PhysXBrokenError") else "INFRA_ERROR"
         result = {"status": status, "error": str(exc), "server_error": server_error}
     finally:
+        if result is not None and result['status'] != 'UNSTABLE':
+            try:
+                native = saved_native_result(attempt, job)
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                result['native_result_error'] = str(exc)
+            else:
+                if native is not None:
+                    if result['status'] != 'SCORED':
+                        result['post_score_error'] = result.copy()
+                    result.update(native)
         if result is not None:
             result.update(run_id=run_id, artifact_dir=str(attempt), elapsed_s=time.time() - started,
                           strategy=job["strategy"], task=job["task"], sample=job["sample"], layout_id=job["layout_id"],

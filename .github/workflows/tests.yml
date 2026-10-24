@@ -1,0 +1,19 @@
+name: Framework tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  cpu-regression:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: experiments/robodojo/requirements.txt
+      - run: python -m pip install -r experiments/robodojo/requirements.txt usd-core==26.11
+      - run: python -m pytest codeworld_robot/tests codeworld_workspace/tests robodojo_benchmark/tests reconstruction_assist/tests -q

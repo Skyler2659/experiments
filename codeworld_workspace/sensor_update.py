@@ -33,8 +33,8 @@ def validate_candidate_assembly(world, assembly):
 def integrate_rgbd(world,capture,proposals,*,max_p90_m=.008,min_points=32,diagnose_observability=False):
     from .world import atomic,read,rigid
     import fcntl
-    from codeworld_robot.grasp import _cloud,_capture
-    world.sync_robot_feedback();path,cap=_capture(world.root,capture)
+    from .observation_evidence import masked_cloud, load_capture
+    world.sync_robot_feedback();path,cap=load_capture(world.root,capture)
     capture_ref=state_ref(cap.get('robot_state',{}))
     if not capture_ref or capture_ref!=state_ref(world._robot_state()):raise ValueError('Stale or unversioned RGB-D capture')
     if (not proposals or isinstance(max_p90_m,bool) or not isinstance(max_p90_m,(int,float))
@@ -58,7 +58,7 @@ def integrate_rgbd(world,capture,proposals,*,max_p90_m=.008,min_points=32,diagno
             mask=masks.get(view['view_id'])
             if mask is None:continue
             # Reuse the calibrated mask validation, then extract a bounded sample.
-            cloud=_cloud(world.root,path,view,mask,min_points)
+            cloud=masked_cloud(world.root,path,view,mask,min_points)
             if cloud is None:
                 stats.append({'view_id':view['view_id'],'status':'INCONCLUSIVE',
                               'reason':'Too few valid target depth pixels'})

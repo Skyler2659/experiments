@@ -6,8 +6,8 @@ import tarfile
 from .catalog import ROOT, read
 
 DIRECTORIES = ("robodojo_benchmark", "codeworld_robot", "codeworld_workspace", "reconstruction_assist", "agentic_mesh_world",
-               "vendor/RecursiveCWM", "vendor/RoboProbe", "vendor/RoboDojo")
-FILES = ("upstream.json", "prompts/robodojo42-adaptive.md", "scripts/setup.sh",
+               "vendor/RecursiveCWM", "vendor/RoboProbe", "vendor/RoboDojo", ".github")
+FILES = ("README.md", "ARCHITECTURE.md", "upstream.json", "prompts/robodojo42-adaptive.md", "scripts/setup.sh",
          "scripts/install_linux_libraries.sh", "scripts/rcwm_world.py", "scripts/export_codeworld.mjs",
          "scripts/jdcloud_responses_proxy.py",
          "scripts/render_codeworld.mjs", "scripts/codeworld_source_files.mjs",
@@ -34,15 +34,17 @@ def bundle(output):
             rel = path.relative_to(ROOT)
             if (not path.is_file() or path.is_symlink() or excluded.intersection(rel.parts)
                 or path.suffix in ('.pyc','.pem','.key') or path.name.startswith('.env')
-                or path.name in ('auth.json','runtime.local.json')):
+                or path.name in ('auth.json','runtime.local.json', 'SOURCE_REVISION.json')
+                or rel == Path('README.md')):
                 continue
             archive.add(path, arcname=str(Path("CodeWorldv1") / rel), recursive=False)
         # Publish the concise operator guide at the archive root; the workspace
         # supervisor AGENTS.md is not an instruction for the receiving operator.
-        archive.add(ROOT / "experiments/robodojo/README.zh-CN.md",
+        archive.add(ROOT / "README.md",
                     arcname="CodeWorldv1/README.md", recursive=False)
         for repo, data in read(ROOT / "experiments/robodojo/upstreams.json").items():
-            payload = json.dumps(data, indent=2).encode()
+            from .provenance import tree_digest
+            payload = json.dumps({**data, 'tree_sha256': tree_digest(ROOT / 'vendor' / repo, ('.',)), 'tree_scope': 'source-v1'}, indent=2).encode()
             info = tarfile.TarInfo(f"CodeWorldv1/vendor/{repo}/SOURCE_REVISION.json"); info.size = len(payload)
             archive.addfile(info, io.BytesIO(payload))
     return str(output)

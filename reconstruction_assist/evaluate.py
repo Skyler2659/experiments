@@ -4,10 +4,11 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from scipy.ndimage import binary_erosion,binary_dilation
-import trimesh,open3d as o
+import trimesh
 from agentic_mesh_world.mesh_world import pose_matrix
 
 def ray_scene(mesh):
+    import open3d as o
     r=o.t.geometry.RaycastingScene();r.add_triangles(o.t.geometry.TriangleMesh.from_legacy(o.geometry.TriangleMesh(o.utility.Vector3dVector(mesh.vertices),o.utility.Vector3iVector(mesh.faces))));return r
 
 def compare_depth(hit,depth,mask,tolerance=.006):
@@ -22,6 +23,7 @@ def compare_depth(hit,depth,mask,tolerance=.006):
             'observed_pixels':int(inside.sum())},excess,missing,matched
 
 def evaluate(export,evidence,scope=None,save_overlays=True):
+    import open3d as o
     out=Path(export);ev=Path(evidence);cfg=json.loads((ev/'config.json').read_text());cap=Path(cfg['capture']);data=json.loads(cap.read_text());ann=Path(cfg['annotations']);packet=json.loads(ann.read_text());by={v['view_id']:v for v in data['views']};summary=json.loads((ev/'model/evidence.json').read_text());plane=np.array(summary['support']['plane_W']);rows=[]
     inventory=json.loads((out/'render.json').read_text())['objects'];expected=set(scope or [])
     for oid in inventory:

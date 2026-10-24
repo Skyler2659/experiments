@@ -79,3 +79,5 @@ stack_bowls           deposit_coin
 | `gt_codeworld` | Ours＋GT CodeWorld：原生几何，观测时更新真实位姿 |
 
 四组使用相同的公开任务 recipe，沿用官方布局、动作预算和评分；Ours 系列使用增强 RGB-D 观测，GT 额外获得真实几何与状态。
+
+开发、模块边界与验证方式见 [ARCHITECTURE.md](ARCHITECTURE.md)。

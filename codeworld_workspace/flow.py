@@ -288,11 +288,11 @@ class FlowMixin:
         finally:del self._flow_derivation
 
     def ingest_grasp_feedback(self, **evidence):
-        from codeworld_robot.grasp import assess_grasp,_capture
+        from .observation_evidence import assess_grasp, load_capture
         from .world import atomic
         import fcntl
         self.sync_robot_feedback()
-        after_path,after=_capture(self.root,evidence['after_capture'])
+        after_path,after=load_capture(self.root,evidence['after_capture'])
         measured_ref=state_ref(after.get('robot_state',{}))
         if not measured_ref or measured_ref!=state_ref(self._robot_state()):
             raise ValueError('Stale or unversioned grasp after-capture; acquire current RGB-D')

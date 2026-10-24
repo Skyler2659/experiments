@@ -85,6 +85,9 @@ class Campaign:
             row = db.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
             if row is None or row["status"] not in ("INFRA_ERROR", "INTERRUPTED"):
                 raise ValueError("Only infrastructure/interrupted attempts can be retried; scored/method failures are final")
+            attempt = self.root / 'runs' / job_id / f"attempt_{row['attempt']:03d}"
+            if (attempt / 'evaluator/_result.json').exists():
+                raise ValueError('Native result exists; recover its score instead of retrying the episode')
             db.execute("UPDATE jobs SET status='PENDING',owner=NULL,result=NULL WHERE job_id=?", (job_id,))
             db.execute("INSERT INTO events VALUES(?,?,?,?)", (time.time(), job_id, "retry", reason))
 
@@ -95,13 +98,23 @@ class Campaign:
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
-            if row is None or row["status"] != "RUNNING":
-                raise ValueError("Only RUNNING jobs need recovery")
+            if row is None or row["status"] not in ('RUNNING', 'INFRA_ERROR', 'INTERRUPTED'):
+                raise ValueError("Only RUNNING or failed infrastructure jobs need recovery")
+            from .results import saved_native_result
+            attempt = self.root / 'runs' / job_id / f"attempt_{row['attempt']:03d}"
+            native = saved_native_result(attempt, self.jobs[job_id])
+            if row['status'] != 'RUNNING' and native is None:
+                raise ValueError('No native score to recover; use retry for infrastructure failures')
             # Recover the already-persisted outcome if the worker died between
             # writing result.json and committing SQLite (including older exports).
             result_path = self.root / 'runs' / job_id / f"attempt_{row['attempt']:03d}" / 'result.json'
-            if result_path.is_file():
-                saved = read(result_path)
+            if result_path.is_file() or native is not None:
+                saved = read(result_path) if result_path.is_file() else {}
+                if native is not None:
+                    if saved.get('status') not in (None, 'SCORED'):
+                        saved['recovered_previous_status'] = saved['status']
+                    saved.update(native)
+                    write(result_path, saved)
                 status = saved.get('status')
                 if status not in ('SCORED', 'METHOD_FAILURE', 'INFRA_ERROR', 'UNSTABLE', 'INTERRUPTED'):
                     raise ValueError('Saved result has an invalid terminal state; inspect before recovering')

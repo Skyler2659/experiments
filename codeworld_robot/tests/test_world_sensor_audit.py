@@ -121,26 +121,26 @@ class WorldSensorAuditTests(unittest.TestCase):
         self.assertEqual(self.world.state(),before)
 
     def test_rgbd_commit_rechecks_live_robot_after_fitting(self):
-        from codeworld_robot.grasp import _cloud
+        from codeworld_workspace.observation_evidence import masked_cloud
         capture=self.capture();self.world.sync_robot_feedback();before=self.world.state()
         def moving_cloud(*args,**kwargs):
-            value=_cloud(*args,**kwargs);self.advance_robot();return value
-        with patch('codeworld_robot.grasp._cloud',side_effect=moving_cloud),self.assertRaises(ValueError):
+            value=masked_cloud(*args,**kwargs);self.advance_robot();return value
+        with patch('codeworld_workspace.observation_evidence.masked_cloud',side_effect=moving_cloud),self.assertRaises(ValueError):
             self.world.integrate_rgbd(capture,self.proposals())
         self.assertEqual(self.world.state(),before)
 
     def test_unrelated_feedback_update_is_preserved_when_fit_commits(self):
-        from codeworld_robot.grasp import _cloud
+        from codeworld_workspace.observation_evidence import masked_cloud
         capture=self.capture();self.world.sync_robot_feedback()
         def unrelated_update(*args,**kwargs):
-            result=_cloud(*args,**kwargs)
+            result=masked_cloud(*args,**kwargs)
             state=self.world.state();state['revision']+=1
             state['objects']['unrelated']={'T_W_object':np.eye(4).tolist(),'basis':'other_update'}
             state.setdefault('measurements',{})['new_feedback']={'value':'preserve this'}
             state['history'].append({'kind':'unrelated_feedback'})
             atomic(self.world.state_path,state)
             return result
-        with patch('codeworld_robot.grasp._cloud',side_effect=unrelated_update):
+        with patch('codeworld_workspace.observation_evidence.masked_cloud',side_effect=unrelated_update):
             result=self.world.integrate_rgbd(capture,self.proposals())
         self.assertEqual(result['objects']['box']['status'],'SURFACE_CONSISTENT')
         final=self.world.state()
@@ -149,33 +149,33 @@ class WorldSensorAuditTests(unittest.TestCase):
         self.assertEqual(final['history'][-2]['kind'],'unrelated_feedback')
 
     def test_same_object_change_while_fitting_is_not_overwritten(self):
-        from codeworld_robot.grasp import _cloud
+        from codeworld_workspace.observation_evidence import masked_cloud
         capture=self.capture();self.world.sync_robot_feedback()
         def target_update(*args,**kwargs):
-            result=_cloud(*args,**kwargs)
+            result=masked_cloud(*args,**kwargs)
             state=self.world.state();state['revision']+=1
             state['objects']['box']['T_W_object'][0][3]=.33
             atomic(self.world.state_path,state)
             return result
-        with patch('codeworld_robot.grasp._cloud',side_effect=target_update),self.assertRaisesRegex(ValueError,'Target object changed'):
+        with patch('codeworld_workspace.observation_evidence.masked_cloud',side_effect=target_update),self.assertRaisesRegex(ValueError,'Target object changed'):
             self.world.integrate_rgbd(capture,self.proposals())
         self.assertEqual(self.world.state()['objects']['box']['T_W_object'][0][3],.33)
         self.assertNotIn('sensor_validation',self.world.state()['objects']['box'])
 
     def test_changed_target_geometry_while_fitting_is_rejected(self):
-        from codeworld_robot.grasp import _cloud
+        from codeworld_workspace.observation_evidence import masked_cloud
         capture=self.capture();self.world.sync_robot_feedback()
         def geometry_update(*args,**kwargs):
-            result=_cloud(*args,**kwargs)
+            result=masked_cloud(*args,**kwargs)
             trimesh.creation.box([.2,.2,.3]).export(self.root/'geometry/box.ply')
             return result
-        with patch('codeworld_robot.grasp._cloud',side_effect=geometry_update),self.assertRaisesRegex(ValueError,'Target geometry changed'):
+        with patch('codeworld_workspace.observation_evidence.masked_cloud',side_effect=geometry_update),self.assertRaisesRegex(ValueError,'Target geometry changed'):
             self.world.integrate_rgbd(capture,self.proposals())
         self.assertNotIn('sensor_validation',self.world.state()['objects']['box'])
 
     def test_old_grasp_capture_cannot_be_restamped_as_current(self):
         capture=self.capture();self.advance_robot()
-        with patch('codeworld_robot.grasp.assess_grasp') as assess,self.assertRaises(ValueError):
+        with patch('codeworld_workspace.observation_evidence.assess_grasp') as assess,self.assertRaises(ValueError):
             self.world.ingest_grasp_feedback(after_capture=capture,object_id='box')
         assess.assert_not_called()
         self.assertFalse(self.world.state().get('measurements'))
@@ -184,13 +184,13 @@ class WorldSensorAuditTests(unittest.TestCase):
         capture=self.capture();self.world.sync_robot_feedback();before=self.world.state()
         def moving_assessment(*args,**kwargs):
             self.advance_robot();return {'status':'LIFT_EVIDENCE'}
-        with patch('codeworld_robot.grasp.assess_grasp',side_effect=moving_assessment),self.assertRaises(ValueError):
+        with patch('codeworld_workspace.observation_evidence.assess_grasp',side_effect=moving_assessment),self.assertRaises(ValueError):
             self.world.ingest_grasp_feedback(after_capture=capture,object_id='box')
         self.assertEqual(self.world.state(),before)
 
     def test_fresh_grasp_measurement_keeps_capture_version(self):
         capture=self.capture()
-        with patch('codeworld_robot.grasp.assess_grasp',return_value={'status':'INCONCLUSIVE'}):
+        with patch('codeworld_workspace.observation_evidence.assess_grasp',return_value={'status':'INCONCLUSIVE'}):
             result=self.world.ingest_grasp_feedback(after_capture=capture,object_id='box')
         measurement=self.world.state()['measurements'][result['measurement_id']]
         self.assertEqual(measurement['robot_state_ref'],state_ref(self.robot))

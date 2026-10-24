@@ -158,8 +158,8 @@ interrupted. This does not assert a physical outcome. Official benchmark scoring
 On interruption stop; never claim completion merely because the CLI exits successfully.
 '''
     if config.get('benchmark_protocol')=='robodojo-v1':
-        from robodojo_benchmark.instructions import agent_instructions
-        instructions=agent_instructions(instructions,config['representation'],config.get('gt_mode'))
+        from .hooks import load_hook
+        instructions=load_hook(config['instruction_transform'])(instructions,config['representation'],config.get('gt_mode'))
     (directory/'AGENTS.md').write_text(instructions)
     prompt = 'Execute the goal in task/task.json of the configured episode. Start by reading its instructions through remote.py. Plan and act independently using '+('the direct RGB-D ablation interface.' if config.get('representation')=='none' else 'CodeWorld.')
     (directory/'prompt.txt').write_text(prompt)

@@ -93,7 +93,8 @@ def test_export_failure_preserves_committed_score(tmp_path, monkeypatch, failure
         assert campaign.rows()[0]['status']=='SCORED'
         raise failure
     monkeypatch.setattr(artifacts,'_export',fail_export)
-    result=execute_job(campaign,job,{'robodojo_root':str(tmp_path)},'0')
+    from robodojo_benchmark.catalog import ROOT
+    result=execute_job(campaign,job,{'robodojo_root':str(ROOT/'vendor/RoboDojo')},'0')
     # Execution itself must no longer perform media work.
     assert campaign.rows()[0]['status']=='RUNNING'
     if isinstance(failure,KeyboardInterrupt):

@@ -68,15 +68,12 @@ def doctor(runtime, jobs):
     for repo in ("RoboDojo", "RoboProbe"):
         folder = Path(runtime.get("robodojo_root" if repo == "RoboDojo" else "roboprobe_root", ""))
         pinned = read(ROOT / "experiments/robodojo/upstreams.json")[repo]["commit"]
-        if (folder / ".git").exists():
-            p = subprocess.run(["git", "-C", str(folder), "rev-parse", "HEAD"], text=True, capture_output=True)
-            actual = p.stdout.strip()
-            if p.returncode or actual != pinned:
-                errors.append(f"{repo} revision mismatch: expected {pinned}, got {actual or 'unreadable'}")
-        elif not (folder / "SOURCE_REVISION.json").exists():
-            errors.append(f"{repo} has neither Git revision nor bundle SOURCE_REVISION.json")
-        elif read(folder / "SOURCE_REVISION.json").get("commit") != pinned:
-            errors.append(f"{repo} bundle revision mismatch")
+        from .provenance import upstream_state
+        observed = upstream_state(folder, pinned)
+        checks.append({'name': repo + '_source', **observed})
+        errors.extend(repo + ': ' + error for error in observed['errors'])
+        if observed['commit'] is None and not observed['distributed_digest_verified']:
+            warnings.append(repo + ': exported tree has no verified distribution digest')
     rb = Path(runtime.get("robodojo_root", ""))
     asset_pin = read(ROOT / 'experiments/robodojo/platform_sources.json')['Assets']['commit']
     actual_assets = asset_revision(rb)

@@ -1,5 +1,7 @@
 {
   "url": "https://github.com/RoboProbe/RoboProbe.git",
   "commit": "3c0bc68383a75bf3fa2d7bfc5ab1d1241c7e171e",
-  "harness": "RoboDojo_Agent_L3_Inspect_EEF"
+  "harness": "RoboDojo_Agent_L3_Inspect_EEF",
+  "tree_sha256": "819e42b94ac5944f3e83ccd6c36154917f44931fe39f37e4bc8ea958e37098d6",
+  "tree_scope": "source-v1"
 }

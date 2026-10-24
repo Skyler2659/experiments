@@ -97,6 +97,22 @@ class Campaign:
             row = db.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
             if row is None or row["status"] != "RUNNING":
                 raise ValueError("Only RUNNING jobs need recovery")
+            # Recover the already-persisted outcome if the worker died between
+            # writing result.json and committing SQLite (including older exports).
+            result_path = self.root / 'runs' / job_id / f"attempt_{row['attempt']:03d}" / 'result.json'
+            if result_path.is_file():
+                saved = read(result_path)
+                status = saved.get('status')
+                if status not in ('SCORED', 'METHOD_FAILURE', 'INFRA_ERROR', 'UNSTABLE', 'INTERRUPTED'):
+                    raise ValueError('Saved result has an invalid terminal state; inspect before recovering')
+                payload = json.dumps(saved, allow_nan=False)
+                now = time.time()
+                db.execute('UPDATE jobs SET status=?,updated=?,result=? WHERE job_id=?',
+                           (status, now, payload, job_id))
+                db.execute('UPDATE attempts SET status=?,finished=?,result=? WHERE job_id=? AND attempt=?',
+                           (status, now, payload, job_id, row['attempt']))
+                db.execute('INSERT INTO events VALUES(?,?,?,?)', (now, job_id, 'recover_saved_result', reason))
+                return
             db.execute("UPDATE jobs SET status='INTERRUPTED',updated=? WHERE job_id=?", (time.time(), job_id))
             db.execute("UPDATE attempts SET status='INTERRUPTED',finished=? WHERE job_id=? AND attempt=?",
                        (time.time(), job_id, row["attempt"]))

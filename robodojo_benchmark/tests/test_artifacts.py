@@ -65,3 +65,62 @@ def test_api_configuration_does_not_save_key(tmp_path,monkeypatch):
     assert config['reconstruction_base_url']==config['roboprobe_base_url']
     assert 'secret-fixture-value' not in runtime.read_text()+provider.read_text()
     with pytest.raises(ValueError):module.configure(runtime,'https://example.com/v1/responses')
+
+
+@pytest.mark.parametrize('timeline', ['', '{truncated', '{"frame":2}\n'])
+def test_invalid_timeline_records_failure(tmp_path, timeline):
+    io=tmp_path/'episode/robot_io';io.mkdir(parents=True)
+    (io/'continuous.mp4').write_bytes(b'not reached')
+    (io/'timeline.jsonl').write_text(timeline)
+    with pytest.raises(ValueError):export(tmp_path)
+    manifest=json.loads((tmp_path/'artifacts/manifest.json').read_text())
+    assert manifest['status']=='ERROR'
+    assert manifest['error'] and manifest['error_type']
+
+
+@pytest.mark.parametrize('failure',[RuntimeError('encoder failed'),KeyboardInterrupt('export stopped')])
+def test_export_failure_preserves_committed_score(tmp_path, monkeypatch, failure):
+    from robodojo_benchmark.campaign import Campaign
+    from robodojo_benchmark.worker import execute_job, finish_job
+    from robodojo_benchmark import artifacts
+    campaign=Campaign.create(tmp_path/'campaign',{'tasks':['build_tower'],'samples':1,'strategies':['ours_no_codeworld']})
+    job=campaign.claim(list(campaign.jobs))
+    layout=tmp_path/'layout.json';dump(layout,{})
+    monkeypatch.setattr('robodojo_benchmark.worker.asset_revision',lambda _:None)
+    monkeypatch.setattr('robodojo_benchmark.worker.layout_path',lambda *_:layout)
+    monkeypatch.setattr('robodojo_benchmark.worker.run_ours',lambda *a,**k:{'status':'SCORED','official_success':True,'score_0_100':100})
+    def fail_export(attempt):
+        assert campaign.rows()[0]['status']=='SCORED'
+        raise failure
+    monkeypatch.setattr(artifacts,'_export',fail_export)
+    result=execute_job(campaign,job,{'robodojo_root':str(tmp_path)},'0')
+    # Execution itself must no longer perform media work.
+    assert campaign.rows()[0]['status']=='RUNNING'
+    if isinstance(failure,KeyboardInterrupt):
+        with pytest.raises(KeyboardInterrupt):finish_job(campaign,job,result)
+    else:finish_job(campaign,job,result)
+    row=campaign.rows()[0]
+    assert row['status']=='SCORED' and row['result']['official_success'] is True
+    assert json.loads((Path(result['artifact_dir'])/'result.json').read_text())==row['result']
+    manifest=json.loads((Path(result['artifact_dir'])/'artifacts/manifest.json').read_text())
+    assert manifest['status']==('INTERRUPTED' if isinstance(failure,KeyboardInterrupt) else 'ERROR')
+    with pytest.raises(ValueError):campaign.recover(job['job_id'],'worker stopped')
+    with pytest.raises(ValueError):campaign.retry(job['job_id'],'video failed')
+    # Artifact-only retry restores the manifest without executing another episode.
+    def successful_export(attempt):
+        manifest={'status':'COMPLETE'};dump(Path(attempt)/'artifacts/manifest.json',manifest);return manifest
+    monkeypatch.setattr(artifacts,'_export',successful_export)
+    assert export(result['artifact_dir'])['status']=='COMPLETE'
+    assert campaign.rows()[0]['attempt']==1
+
+
+def test_recover_saved_score_from_old_interrupted_export(tmp_path):
+    from robodojo_benchmark.campaign import Campaign
+    campaign=Campaign.create(tmp_path/'campaign',{'tasks':['build_tower'],'samples':1,'strategies':['ours']})
+    job=campaign.claim(list(campaign.jobs))
+    saved={'status':'SCORED','official_success':False,'score_0_100':30}
+    dump(campaign.root/'runs'/job['job_id']/'attempt_001/result.json',saved)
+    campaign.recover(job['job_id'],'old worker interrupted after scoring')
+    assert campaign.rows()[0]['status']=='SCORED'
+    assert campaign.rows()[0]['result']==saved
+    with pytest.raises(ValueError):campaign.retry(job['job_id'],'retry export')

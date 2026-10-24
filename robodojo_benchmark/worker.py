@@ -353,12 +353,18 @@ def execute_job(campaign, job, runtime, gpu, *, probe=False):
                           strategy=job["strategy"], task=job["task"], sample=job["sample"], layout_id=job["layout_id"],
                           native_task=job["native_task"], eval_seed=job["eval_seed"], probe_only=probe)
             write(attempt / "result.json", result)
-            if not probe:
-                try:
-                    from .artifacts import export
-                    result['artifact_status'] = export(attempt)['status']
-                except Exception as exc:
-                    result['artifact_status'] = 'ERROR'
-                    result['artifact_error'] = str(exc)
-                write(attempt / "result.json", result)
     return result
+
+
+def finish_job(campaign, job, result):
+    """Commit the experiment outcome before optional, independently retryable media."""
+    campaign.finish(job, result)
+    if not result.get('probe_only'):
+        from .artifacts import export
+        try:
+            export(result['artifact_dir'])
+        except Exception as exc:
+            # The exporter persists its own failure manifest. A video failure
+            # must not change the native score or make a scored episode retryable.
+            print(f"Artifact export failed: {exc}; see {result['artifact_dir']}/artifacts/manifest.json", flush=True)
+    # KeyboardInterrupt intentionally propagates after the score is committed.

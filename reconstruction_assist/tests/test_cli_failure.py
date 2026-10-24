@@ -1,5 +1,4 @@
 """A failed CLI must never be hidden by an old valid scene delivery."""
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -10,12 +9,6 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 
 class CliFailureTest(unittest.TestCase):
-    def test_default_and_continuation_env_supply_local_bridge_placeholder(self):
-        spec=importlib.util.spec_from_file_location('env_batch',ROOT/'scripts/libero20_server/batch.py')
-        batch=importlib.util.module_from_spec(spec);spec.loader.exec_module(batch)
-        self.assertEqual(batch.env()['RCWM_JDCLOUD_PROXY_KEY'],'rcwm-local')
-        self.assertIn("RCWM_JDCLOUD_PROXY_KEY='rcwm-local'",(ROOT/'scripts/libero20_server/continue_joint_correction.py').read_text())
-
     def test_new_and_resumed_cli_fail_before_fit_or_reusing_old_delivery(self):
         for resume in [False,True]:
             with self.subTest(resume=resume),tempfile.TemporaryDirectory() as d:

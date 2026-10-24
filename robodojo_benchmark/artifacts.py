@@ -43,7 +43,7 @@ def world_panel(root, snapshot, bounds=None):
     return result, bounds
 
 
-def export(attempt):
+def _export(attempt):
     import cv2
     import imageio_ffmpeg
     attempt = Path(attempt).resolve()
@@ -117,6 +117,24 @@ def export(attempt):
         for log in logs:log.close()
         write(out/'manifest.json',manifest)
     return manifest
+
+
+def export(attempt):
+    """Record every export failure, including dependency/setup errors and interruption."""
+    out = Path(attempt).resolve() / 'artifacts'
+    out.mkdir(parents=True, exist_ok=True)
+    try:
+        return _export(attempt)
+    except (Exception, KeyboardInterrupt) as exc:
+        manifest_path = out / 'manifest.json'
+        try:
+            manifest = json.loads(manifest_path.read_text())
+        except (OSError, ValueError):
+            manifest = {}
+        manifest.update(status='INTERRUPTED' if isinstance(exc, KeyboardInterrupt) else 'ERROR',
+                        error=str(exc) or type(exc).__name__, error_type=type(exc).__name__)
+        write(manifest_path, manifest)
+        raise
 
 
 def main():

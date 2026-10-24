@@ -9,7 +9,7 @@ DIRECTORIES = ("robodojo_benchmark", "codeworld_robot", "codeworld_workspace", "
                "vendor/RecursiveCWM", "vendor/RoboProbe", "vendor/RoboDojo")
 FILES = ("upstream.json", "prompts/robodojo42-adaptive.md", "scripts/setup.sh",
          "scripts/install_linux_libraries.sh", "scripts/rcwm_world.py", "scripts/export_codeworld.mjs",
-         "scripts/jdcloud_responses_proxy.py", "scripts/libero20_server/batch.py", "scripts/libero20_server/continue_joint_correction.py",
+         "scripts/jdcloud_responses_proxy.py",
          "scripts/render_codeworld.mjs", "scripts/codeworld_source_files.mjs",
          "scripts/robodojo42/inventory.py", "scripts/robodojo42/prepare.py", "scripts/robodojo42/render_ready.py")
 EXPERIMENT_FILES = ("suite.json", "upstreams.json", "platform_sources.json", "requirements.txt", "requirements-reconstruction.txt",

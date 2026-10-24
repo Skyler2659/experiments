@@ -68,7 +68,7 @@ def main():
             if args.state and row['status'] != args.state:continue
             print(f"{key}\t{row['status']}\tattempt={row['attempt']}\t{j['native_task']}\tlayout={j['layout_id']}\teval_seed={j['eval_seed']}")
         return
-    from .worker import runtime_config, execute_job
+    from .worker import runtime_config, execute_job, finish_job
     runtime = runtime_config(args.runtime)
     if args.command == "doctor":
         from .doctor import doctor
@@ -91,7 +91,7 @@ def main():
                 break
             print(json.dumps({"started": job["job_id"], "attempt": job["attempt"]}), flush=True)
             result = execute_job(c, job, runtime, args.gpu, probe=args.command == "probe")
-            c.finish(job, result)
+            finish_job(c, job, result)
             print(json.dumps(result), flush=True)
             failed |= result["status"] in ("INFRA_ERROR", "UNSTABLE", "INTERRUPTED")
             count += 1

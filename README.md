@@ -1,96 +1,81 @@
-# CodeWorldv1 实验运行说明
+# CodeWorld
 
-## 提前准备
+以下命令均在仓库根目录执行；首次使用先完成文末的依赖安装。
 
-Linux、NVIDIA 驱动及能运行 **Isaac Sim 5.1 相机渲染**的 GPU/环境（仅知道是 H 卡不足以确认兼容）、`git`、Git LFS、`uv`、Node.js/npm，以及可下载依赖和 RoboDojo Assets 的网络。推荐复用已验证的 RoboDojo/IsaacLab Python；Assets 不包含在源码包中。
+## 接入 API Key
 
-在仓库根目录（本 README 所在目录）中执行：
-
-```bash
-bash experiments/robodojo/install.sh --sim-python /你的RoboDojo环境/bin/python --assets /你的Assets目录
-# 没有现成环境时，安装器也支持 --bootstrap-sim；省略 --assets 会下载官方资产。
-```
-
-安装器准备独立的仿真、控制、重建环境、固定版本 Codex CLI 和重建依赖，生成 `experiments/robodojo/runtime.local.json`。视频导出依赖 OpenCV、Pillow 和 imageio-ffmpeg，随控制环境安装。
-
-## 接入 API
-
-需要支持所配置模型、图片输入及 Responses API 的服务。默认模型为 `gpt-6-astra`、推理等级 `high`；具体模型是否开放取决于服务方。只有 Codex 登录额度不能直接运行原版 RoboProbe API baseline。
+配置支持图片输入和 Responses API 的服务，默认模型为 `gpt-6-astra` / `high`。服务地址不带 `/responses`；Codex 登录额度不能代替 RoboProbe 所需的 API Key。
 
 ```bash
-export OPENAI_API_KEY='你的API密钥'  # 仅在运行机器设置，不写入实验包
+export OPENAI_API_KEY='你的API密钥'
 .venv-benchmark/bin/python experiments/robodojo/configure_api.py --base-url https://你的服务/v1
 ```
 
-该命令同时配置 Agent、重建和 RoboProbe，密钥只从环境变量读取。自定义变量可传 `--key-env NAME`。服务地址不包含 `/responses`。设置依据：[Codex 配置文档](https://developers.openai.com/codex/config-reference/)。
+## 启动实验
 
-## 开始跑
+首次初始化并检查环境，然后选择单个实验或批量运行。单个实验参数依次为：策略、任务、样本（1–50）、GPU。
 
 ```bash
 PY=.venv-benchmark/bin/python
-$PY -m robodojo_benchmark init --output campaigns/main
+$PY -m robodojo_benchmark init --output campaigns/main  # 仅首次执行
 $PY -m robodojo_benchmark doctor --campaign campaigns/main --runtime experiments/robodojo/runtime.local.json
 
-# 指定策略、任务、样本（1–50）、GPU
+# 单个实验
 bash experiments/robodojo/run_one.sh ours build_tower 1 0
 
-# 批量领取尚未运行的实验；同一 GPU 使用一个 worker
+# 或：批量运行尚未完成的队列（每块 GPU 一个 worker）
 $PY -m robodojo_benchmark worker --campaign campaigns/main --runtime experiments/robodojo/runtime.local.json --gpu 0
-$PY -m robodojo_benchmark summary --campaign campaigns/main
 ```
 
-默认 **14 × 4 × 50 = 2,800 次**。修改 `experiments/robodojo/suite.json` 的 `tasks`、`samples`、`strategies` 后初始化**新 campaign**即可增减任务/样本；已有 campaign 保留冻结配置。worker 可通过 `--strategy`、`--task`、`--sample` 筛选；每台机器独立输出时，应分配不重叠的任务范围。
+## 实验结果
 
-## 任务和 baseline
-
-|任务 ID|任务|
-|---|---|
-|`insert_tubes`|Insert Tubes|
-|`build_tower`|Build Tower|
-|`pack_objects_into_box`|Pack Objects Into Box|
-|`hang_mugs`|Hang Mugs|
-|`fill_egg_holder`|Fill Egg Holder|
-|`organize_table`|Organize Table|
-|`arrange_largest_number`|Arrange Largest Number|
-|`swap_T`|Swap T|
-|`store_tools_in_toolbox`|Store Tools In Toolbox|
-|`sweep_blocks`|Sweep Blocks|
-|`play_stacking_toy`|Play Stacking Toy|
-|`fill_pen_holder`|Fill Pen Holder|
-|`stack_bowls`|Stack Bowls|
-|`deposit_coin`|Deposit Coin|
-
-|策略 ID|含义|
-|---|---|
-|`roboprobe_l3`|官方 RoboProbe-L3，原生 RGB＋机器人状态|
-|`ours_no_codeworld`|Ours − CodeWorld，RGB-D，无持久三维世界|
-|`ours`|Ours，RGB-D 重建＋CodeWorld|
-|`gt_codeworld`|Ours＋GT CodeWorld，原生几何；观测时更新真实位姿|
-
-沿用官方布局、动作预算和评分；RGB-D 是明确披露的观测增强。GT 默认 `live_state`，包含几何、身份和状态信息优势。
-
-## 产出资产和目录
-
-每次实验位于 `campaigns/main/runs/<任务>__<样本三位数>__<策略>/attempt_001/`（重试产生新 attempt）。以下路径均相对此目录：
-
-|产出|位置|
-|---|---|
-|CodeWorld 生成代码|`episode/source/`，递归重建中间代码在 `episode/preparation/runtime/runs/`|
-|CodeWorld 描述及状态|`episode/world.json`、`episode/objects/`、`episode/state/`|
-|3D 资产|`episode/geometry/`；Ours 重建导出在 `episode/preparation/export/`|
-|Agent 操作与模型记录|`agent/events.jsonl`、`agent/final.txt`、`episode/robot_io/requests/` 与 `responses/`；RoboProbe 模型记录在 `trace/`|
-|任务视频|`artifacts/task.mp4`；原始录像 `episode/robot_io/continuous.mp4`|
-|CodeWorld＋任务同步视频|`artifacts/codeworld_task_sync.mp4`|
-|Agent 操作＋任务视角同步视频|`artifacts/agent_task_sync.mp4`|
-|逐帧同步依据和世界快照|`episode/robot_io/timeline.jsonl`、`episode/robot_io/world_snapshots/`|
-|官方评分、运行结果、产物状态|`evaluator/`、`result.json`、`artifacts/manifest.json`|
-
-视频在实验结束后自动导出。CodeWorld 画面展示该帧最近记录的世界状态，观测间保持不变；Agent 视频展示实际操作请求/原生动作，完整记录保存在日志中。视频按任务帧同步，不包含模型等待时长。无 CodeWorld 和 RoboProbe 分支不生成虚构的 CodeWorld 代码、3D 资产或对比视频；GT 使用原生导出世界和通用代码接口（`episode/tools/codeworld_workspace/`），没有重建生成程序。CodeWorld 视频省略不会随关节更新的初始机器人网格。
-
-单独补导出（不会重跑实验）：
+结果位于 `campaigns/main/runs/<任务>__<样本三位数>__<策略>/attempt_001/`。查看汇总：
 
 ```bash
-.venv-benchmark/bin/python -m robodojo_benchmark.artifacts --attempt campaigns/main/runs/build_tower__001__ours/attempt_001
+.venv-benchmark/bin/python -m robodojo_benchmark summary --campaign campaigns/main
 ```
 
-`manifest.json` 为 `COMPLETE` 才表示视频导出完成。缺少新时间轴的历史运行无法补造同步视频；仿真启动前失败也不会有任务录像。官方任务成功以 `result.json` 的 `official_success` 为准，与视频导出状态独立。
+```text
+result.json                         运行结果与官方评分
+agent/、episode/robot_io/            Agent 记录、动作请求和回执；RoboProbe 记录在 trace/
+episode/source/、episode/geometry/   CodeWorld 生成代码与 3D 资产
+artifacts/task.mp4                   任务视频
+artifacts/codeworld_task_sync.mp4    CodeWorld 与任务同步视频
+artifacts/agent_task_sync.mp4        Agent 操作与任务同步视频
+artifacts/manifest.json              视频导出状态
+```
+
+无 CodeWorld 的策略不生成世界资产及其对比视频；GT 使用原生几何和通用世界接口，没有重建生成代码。同步视频中的世界状态随观测更新。
+
+## 依赖与安装
+
+需要 Linux、NVIDIA 驱动、支持 Isaac Sim 5.1 相机渲染的 GPU、Git/Git LFS、uv、Node.js/npm 和下载网络；H 卡兼容性需实机确认。安装器准备 Python 环境、Codex CLI、重建和视频依赖，并生成 `runtime.local.json`。
+
+```bash
+# 已有 RoboDojo / Isaac Sim 5.1 / IsaacLab 环境和官方 Assets
+bash experiments/robodojo/install.sh --sim-python /你的环境/bin/python --assets /你的Assets目录
+
+# 或：自动安装仿真环境并下载资产
+bash experiments/robodojo/install.sh --bootstrap-sim
+```
+
+## 实验与策略
+
+RoboDojo **14 个任务 × 4 种策略 × 50 个样本，共 2,800 次**。配置在 `experiments/robodojo/suite.json`；修改任务、样本或策略后初始化新的 campaign。
+
+```text
+insert_tubes          build_tower           pack_objects_into_box
+hang_mugs             fill_egg_holder       organize_table
+arrange_largest_number  swap_T              store_tools_in_toolbox
+sweep_blocks          play_stacking_toy     fill_pen_holder
+stack_bowls           deposit_coin
+```
+
+| 策略 ID | 内容 |
+|---|---|
+| `roboprobe_l3` | RoboProbe-L3：原生 RGB＋机器人状态 |
+| `ours_no_codeworld` | Ours − CodeWorld：RGB-D，无持久三维世界 |
+| `ours` | Ours：RGB-D 重建＋CodeWorld |
+| `gt_codeworld` | Ours＋GT CodeWorld：原生几何，观测时更新真实位姿 |
+
+四组使用相同的公开任务 recipe，沿用官方布局、动作预算和评分；Ours 系列使用增强 RGB-D 观测，GT 额外获得真实几何与状态。

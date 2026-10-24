@@ -1,0 +1,4 @@
+# Python side of the runtime root ($RCWM_ROOT/.venv). This is all a solver session needs:
+# the scene programs it writes use Pillow/numpy for side-by-sides, crops and diffs.
+pillow==12.3.0
+numpy==2.5.2

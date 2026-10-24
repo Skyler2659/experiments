@@ -1,0 +1,4 @@
+# Install into motion_dependencies with the native FetchBench Python 3.8.
+# Keep simulator numpy / torch unchanged: pip install --no-deps --target TARGET -r THIS_FILE
+python-fcl==0.7.0.6
+trimesh==4.5.1

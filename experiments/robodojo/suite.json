@@ -1,0 +1,46 @@
+{
+  "name": "robodojo_14_tasks",
+  "eval_seed": 0,
+  "gt_mode": "live_state",
+  "samples": "all",
+  "strategies": [
+    "roboprobe_l3",
+    "ours_no_codeworld",
+    "ours",
+    "gt_codeworld"
+  ],
+  "tasks": [
+    "insert_tubes",
+    "build_tower",
+    "pack_objects_into_box",
+    "hang_mugs",
+    "fill_egg_holder",
+    "organize_table",
+    "arrange_largest_number",
+    "swap_T",
+    "store_tools_in_toolbox",
+    "sweep_blocks",
+    "play_stacking_toy",
+    "fill_pen_holder",
+    "stack_bowls",
+    "deposit_coin"
+  ],
+  "agent": {
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "wall_timeout_s": 14400
+  },
+  "roboprobe": {
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "max_llm_calls": 170,
+    "image_horizon": 2
+  },
+  "reconstruction": {
+    "model": "gpt-6-astra",
+    "reasoning_effort": "high",
+    "max_depth": 4,
+    "max_cycles": 8,
+    "wall_timeout_s": 14400
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "robodojo_root": "../../vendor/RoboDojo",
+  "roboprobe_root": "../../vendor/RoboProbe",
+  "sim_python": "/opt/conda/envs/RoboDojo/bin/python",
+  "control_python": "../../.venv-benchmark/bin/python",
+  "reconstruction_python": "../../.venv-reconstruction/bin/python",
+  "reconstruction_runtime": "../../runtime",
+  "codex": "codex",
+  "vision_transport": "codex",
+  "reconstruction_sandbox": "workspace-write",
+  "roboprobe_base_url": "",
+  "roboprobe_api_key_env": "OPENAI_API_KEY",
+  "startup_timeout_s": 900,
+  "env": {"OMNI_KIT_ACCEPT_EULA": "YES", "ACCEPT_EULA": "Y", "ROBODOJO_PATH_TRACING": "1"}
+}

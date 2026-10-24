@@ -1,0 +1,22 @@
+# Local environments, credentials and generated runs
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv*/
+node_modules/
+.env
+.env.*
+!.env.example
+auth.json
+provider.local.toml
+runtime.local.json
+.codex-home/
+.codex-cli/
+.candidate-codex-home/
+runtime/
+campaigns/
+*.pem
+*.key
+vendor/RoboDojo/Assets/
+vendor/RoboDojo/third_party/

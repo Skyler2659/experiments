@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/ZhiqiLi-CG/RecursiveCWM_code",
+  "commit": "3ecb133bc51d663ca296f2c653b70fa51cb02564",
+  "license": "MIT",
+  "local_modifications": true,
+  "modifications": [
+    "Optional measured fit and geometry-feedback hook in recursive runner; inactive unless configured",
+    "Propagate child/service failures through recursive entry point",
+    "Configurable reconstruction CLI sandbox and episode-private authentication-home annotation"
+  ]
+}

@@ -1,0 +1,13 @@
+numpy>=1.26,<3
+scipy>=1.11
+trimesh==4.5.1
+python-fcl==0.7.0.11
+ruckig>=0.14,<0.20
+rtree>=1.2
+PyYAML>=6
+Pillow>=10
+pytest>=8
+omegaconf>=2.3
+
+imageio-ffmpeg>=0.6,<0.7
+opencv-python-headless>=4.10,<5

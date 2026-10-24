@@ -1,0 +1,587 @@
+{
+  "date": "2026-10-24",
+  "purpose": "engineering_validation_not_research_results",
+  "planned_episodes": 2000,
+  "paired_samples": 500,
+  "formal_episodes_executed": 0,
+  "host": {
+    "gpu": "NVIDIA L20",
+    "isaac_sim": "5.1",
+    "codex_cli": "0.160.0",
+    "model": "gpt-6-astra",
+    "reasoning_effort": "medium",
+    "recipient_h_gpu_verified": false
+  },
+  "test_results": {
+    "local_robot_world_benchmark": "219 passed, 13 subtests passed in 7.68s",
+    "upstream_roboprobe": "358 passed, 85 skipped, 9 subtests passed in 23.45s",
+    "extracted_package_control": "217 passed, 2 skipped, 13 subtests passed in 20.61s",
+    "extracted_package_reconstruction": "57 passed, 2 subtests passed in 8.48s"
+  },
+  "native_probes": {
+    "native_task_variants": 14,
+    "base_tasks": 10,
+    "probes": [
+      {
+        "task": "hang_mugs",
+        "native_task": "hang_mugs",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 800,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 250.3760290145874,
+        "artifact": "validation/native_suite_r04/runs/hang_mugs__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "pack_objects_into_box",
+        "native_task": "pack_objects_into_box_random",
+        "sample": 26,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1300,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 319.1439862251282,
+        "artifact": "validation/native_suite_r04/runs/pack_objects_into_box__026__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "build_tower",
+        "native_task": "build_tower",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1050,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 121.63137221336365,
+        "artifact": "validation/native_suite_r04/runs/build_tower__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "pack_objects_into_box",
+        "native_task": "pack_objects_into_box",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1300,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 185.77163863182068,
+        "artifact": "validation/native_suite_r04/runs/pack_objects_into_box__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "insert_tubes",
+        "native_task": "insert_tubes",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 500,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 114.16033339500427,
+        "artifact": "validation/native_suite_r04/runs/insert_tubes__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "hang_mugs",
+        "native_task": "hang_mugs_random",
+        "sample": 26,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 800,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 176.02601051330566,
+        "artifact": "validation/native_remaining_r05/runs/hang_mugs__026__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "arrange_largest_number",
+        "native_task": "arrange_largest_number_random",
+        "sample": 26,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1050,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 236.936429977417,
+        "artifact": "validation/native_remaining_r05/runs/arrange_largest_number__026__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "sweep_blocks",
+        "native_task": "sweep_blocks_random",
+        "sample": 26,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1000,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 188.47640252113342,
+        "artifact": "validation/native_remaining_r05/runs/sweep_blocks__026__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "store_tools_in_toolbox",
+        "native_task": "store_tools_in_toolbox",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 900,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 146.8002998828888,
+        "artifact": "validation/native_remaining_r05/runs/store_tools_in_toolbox__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "swap_T",
+        "native_task": "swap_T",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 400,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 147.64336133003235,
+        "artifact": "validation/native_remaining_r05/runs/swap_T__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "sweep_blocks",
+        "native_task": "sweep_blocks",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1000,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 140.24409008026123,
+        "artifact": "validation/native_remaining_r05/runs/sweep_blocks__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "arrange_largest_number",
+        "native_task": "arrange_largest_number",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1050,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 137.30825114250183,
+        "artifact": "validation/native_remaining_r05/runs/arrange_largest_number__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "organize_table",
+        "native_task": "organize_table",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 1000,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 174.53179287910461,
+        "artifact": "validation/native_remaining_r05/runs/organize_table__001__gt_codeworld/attempt_001/result.json"
+      },
+      {
+        "task": "fill_egg_holder",
+        "native_task": "fill_egg_holder",
+        "sample": 1,
+        "layout_id": 0,
+        "eval_seed": 0,
+        "official_action_limit": 700,
+        "official_actions": 0,
+        "status": "SCORED",
+        "official_success": false,
+        "score_0_100": 0.0,
+        "probe_only": true,
+        "elapsed_s": 172.34349703788757,
+        "artifact": "validation/fill_egg_articulation_r06/runs/fill_egg_holder__001__gt_codeworld/attempt_001/result.json"
+      }
+    ]
+  },
+  "independent_cli": {
+    "ours": {
+      "campaign": "full_ours_r06",
+      "result": {
+        "official_success": false,
+        "score_0_100": 0.0,
+        "native_result": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/full_ours_r06/runs/build_tower__001__ours/attempt_001/evaluator/_result.json",
+        "layout_id": 0,
+        "status": "SCORED",
+        "official_actions": 188,
+        "official_action_limit": 1050,
+        "probe_only": false,
+        "agent_lifecycle": {
+          "run_id": "45f9a67e77d14dc99157739da4c596d1",
+          "model": "gpt-6-astra",
+          "status": "STOPPED",
+          "execution_agent": "codex_cli",
+          "started_at": 1792827151.8299031,
+          "episode": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/full_ours_r06/runs/build_tower__001__ours/attempt_001/episode",
+          "reasoning_effort": "medium",
+          "pid": 3766794,
+          "termination_reason": "wall_timeout",
+          "exit_code": 0,
+          "thread_id": "01a16cd3-622e-7c81-bea5-9ca46215e9f5",
+          "ended_at": 1792827514.8563418
+        },
+        "termination": "agent_wall_budget",
+        "run_id": "full_ours_validation_r06-build_tower__001__ours-2e99c9dce8",
+        "artifact_dir": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/full_ours_r06/runs/build_tower__001__ours/attempt_001",
+        "elapsed_s": 1474.1477320194244,
+        "strategy": "ours",
+        "task": "build_tower",
+        "sample": 1,
+        "native_task": "build_tower",
+        "eval_seed": 0
+      },
+      "native_result": {
+        "success_rate": 0.0,
+        "eval_time": 1,
+        "score": 0.0,
+        "details": {
+          "0": {
+            "layout_id": 0,
+            "success": false,
+            "score": 0.0
+          }
+        }
+      },
+      "official_action_rows": 188,
+      "consecutive": true,
+      "motion_requests": 12,
+      "motions_bound_to_world_decision": true,
+      "response_status_counts": {
+        "OBSERVED": 6,
+        "ERROR": 3,
+        "ARRIVED": 5,
+        "COLLISION_BLOCKED": 2,
+        "EXECUTED": 2,
+        "CLOSED": 1
+      },
+      "non_agent_requests": [
+        "finish"
+      ],
+      "score_hidden_in_action_receipts": true,
+      "state_update_kinds": {
+        "public_robot_feedback": 19,
+        "validated_rgbd_update": 5
+      },
+      "scan_views": 21,
+      "scan_official_actions": 0,
+      "reconstruction_receipt": {
+        "status": "BUILT",
+        "model": "gpt-6-astra",
+        "reasoning_effort": "medium",
+        "reconstruction_sandbox": "danger-full-access",
+        "historical_assets_reused": false,
+        "same_reset_as_execution": true,
+        "source_program_binding_verified": true,
+        "build_report": "preparation/workspace/build_report.json"
+      },
+      "geometry_review": {
+        "reviews": 2,
+        "selected_feedback": "fractal/scene/feedback/scene_review_1792827092417425376",
+        "selected_score": 0.23929898103233427,
+        "selected_status": "FIT_CHECKS_PASSED",
+        "restored_best": false,
+        "stop_reason": "ACCEPTED",
+        "budget_exhausted": false,
+        "independent_acceptance": false
+      },
+      "build_report": {
+        "status": "PASS",
+        "objects": 10,
+        "scope": "source binding and executed geometry equivalence, not task success"
+      },
+      "native_material_errors": 0,
+      "correction_decisions": [
+        "accept",
+        "repair"
+      ]
+    },
+    "gt_codeworld": {
+      "result": {
+        "official_success": false,
+        "score_0_100": 0.0,
+        "native_result": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/agent_arms_r01/runs/build_tower__001__gt_codeworld/attempt_001/evaluator/_result.json",
+        "layout_id": 0,
+        "status": "SCORED",
+        "official_actions": 548,
+        "official_action_limit": 1050,
+        "probe_only": false,
+        "agent_lifecycle": {
+          "run_id": "1f0f01b2558d48d2825b6d81a947d54f",
+          "model": "gpt-6-astra",
+          "status": "STOPPED",
+          "execution_agent": "codex_cli",
+          "started_at": 1792823740.9304457,
+          "episode": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/agent_arms_r01/runs/build_tower__001__gt_codeworld/attempt_001/episode",
+          "reasoning_effort": "medium",
+          "pid": 3689615,
+          "termination_reason": "wall_timeout",
+          "exit_code": 0,
+          "thread_id": "01a16c9f-5441-72e3-a82b-0406f7a96ef3",
+          "ended_at": 1792824347.0363898
+        },
+        "termination": "agent_wall_budget",
+        "run_id": "agent_arms_validation_r01-build_tower__001__gt_codeworld-9630573263",
+        "artifact_dir": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/agent_arms_r01/runs/build_tower__001__gt_codeworld/attempt_001",
+        "elapsed_s": 816.0878841876984,
+        "strategy": "gt_codeworld",
+        "task": "build_tower",
+        "sample": 1,
+        "native_task": "build_tower",
+        "eval_seed": 0
+      },
+      "audit": {
+        "official_action_rows": 548,
+        "consecutive": true,
+        "motion_requests": 29,
+        "motions_bound_to_world_decision": true,
+        "oracle_refreshes": 24,
+        "oracle_object_count": 10,
+        "some_object_pose_changed": true,
+        "score_hidden_in_action_receipts": true
+      }
+    },
+    "ours_no_codeworld": {
+      "result": {
+        "official_success": false,
+        "score_0_100": 10.0,
+        "native_result": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/agent_arms_r01/runs/build_tower__001__ours_no_codeworld/attempt_001/evaluator/_result.json",
+        "layout_id": 0,
+        "status": "SCORED",
+        "official_actions": 748,
+        "official_action_limit": 1050,
+        "probe_only": false,
+        "agent_lifecycle": {
+          "run_id": "e5b0f7a3cc364f84b3809f100fdab1d3",
+          "model": "gpt-6-astra",
+          "status": "STOPPED",
+          "execution_agent": "codex_cli",
+          "started_at": 1792822924.1496813,
+          "episode": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/agent_arms_r01/runs/build_tower__001__ours_no_codeworld/attempt_001/episode",
+          "reasoning_effort": "medium",
+          "pid": 3675094,
+          "termination_reason": "wall_timeout",
+          "exit_code": 0,
+          "thread_id": "01a16c92-dcc3-7223-8d11-c947f13d00ae",
+          "ended_at": 1792823530.4488132
+        },
+        "termination": "agent_wall_budget",
+        "run_id": "agent_arms_validation_r01-build_tower__001__ours_no_codeworld-f8be4b3af1",
+        "artifact_dir": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/agent_arms_r01/runs/build_tower__001__ours_no_codeworld/attempt_001",
+        "elapsed_s": 824.3473572731018,
+        "strategy": "ours_no_codeworld",
+        "task": "build_tower",
+        "sample": 1,
+        "native_task": "build_tower",
+        "eval_seed": 0
+      },
+      "audit": {
+        "official_action_rows": 748,
+        "consecutive": true,
+        "agent_requests": 125,
+        "non_agent_requests": [
+          "finish"
+        ],
+        "task_world_present": false,
+        "target_geometry_directory_present": false,
+        "score_hidden_in_action_receipts": true
+      }
+    }
+  },
+  "validation_budgets_s": {
+    "ours_execution": 360,
+    "ours_reconstruction": 2400,
+    "gt_execution": 600,
+    "no_codeworld_execution": 600
+  },
+  "baseline": {
+    "result": {
+      "status": "SCORED",
+      "official_success": false,
+      "score_0_100": 0.0,
+      "native_result": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/baseline_interface_r01/runs/build_tower__001__roboprobe_l3/attempt_001/evaluator/_result.json",
+      "layout_id": 0,
+      "official_actions": 0,
+      "official_action_limit": 1050,
+      "policy": "RoboDojo_Agent_L3_Inspect_EEF",
+      "probe_only": true,
+      "run_id": "native_probe-build_tower__001__roboprobe_l3-81eba5b58a",
+      "artifact_dir": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/validation/baseline_interface_r01/runs/build_tower__001__roboprobe_l3/attempt_001",
+      "elapsed_s": 147.05585885047913,
+      "strategy": "roboprobe_l3",
+      "task": "build_tower",
+      "sample": 1,
+      "native_task": "build_tower",
+      "eval_seed": 0
+    },
+    "native_rgb_images": 3,
+    "action_dimensions": 14,
+    "model_called": false
+  },
+  "installed_package": {
+    "tested_route": "install.sh --sim-python EXISTING --assets EXISTING --skip-reconstruction",
+    "native_probe": {
+      "official_success": false,
+      "score_0_100": 0.0,
+      "native_result": "/private/lc/research/rcwm_handoff_validation_20261024/package_install_r02/RCWMWorld/validation/installed_gt_probe_r03/runs/build_tower__001__gt_codeworld/attempt_001/evaluator/_result.json",
+      "layout_id": 0,
+      "status": "SCORED",
+      "official_actions": 0,
+      "official_action_limit": 1050,
+      "probe_only": true,
+      "run_id": "native_probe-build_tower__001__gt_codeworld-98a4753272",
+      "artifact_dir": "/private/lc/research/rcwm_handoff_validation_20261024/package_install_r02/RCWMWorld/validation/installed_gt_probe_r03/runs/build_tower__001__gt_codeworld/attempt_001",
+      "elapsed_s": 107.99939441680908,
+      "strategy": "gt_codeworld",
+      "task": "build_tower",
+      "sample": 1,
+      "native_task": "build_tower",
+      "eval_seed": 0
+    },
+    "doctor": {
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "checks": [
+        {
+          "name": "sim_python",
+          "ok": true,
+          "path": "/private/lc/research/rcwm_handoff_validation_20261024/package_install_r02/RCWMWorld/.venv-simulator/bin/python"
+        },
+        {
+          "name": "control_python",
+          "ok": true,
+          "path": "/private/lc/research/rcwm_handoff_validation_20261024/package_install_r02/RCWMWorld/.venv-benchmark/bin/python"
+        },
+        {
+          "name": "codex",
+          "ok": true,
+          "path": "/private/lc/research/rcwm_handoff_validation_20261024/RCWMWorld/.codex-cli/node_modules/.bin/codex"
+        },
+        {
+          "name": "control_python_dependencies",
+          "ok": true,
+          "modules": [
+            "numpy",
+            "scipy",
+            "trimesh",
+            "fcl",
+            "ruckig",
+            "yaml"
+          ],
+          "versions": {
+            "numpy": "2.5.4",
+            "scipy": "1.18.1",
+            "trimesh": "4.5.1",
+            "fcl": "0.7.0.11",
+            "ruckig": "0.19.4",
+            "yaml": "6.0.3"
+          }
+        },
+        {
+          "name": "sim_python_dependencies",
+          "ok": true,
+          "modules": [
+            "numpy",
+            "scipy",
+            "trimesh",
+            "fcl",
+            "ruckig",
+            "omegaconf"
+          ],
+          "versions": {
+            "numpy": "1.26.0",
+            "scipy": "1.15.3",
+            "trimesh": "4.5.1",
+            "fcl": "0.7.0.11",
+            "ruckig": "0.19.4",
+            "omegaconf": "2.3.1"
+          }
+        },
+        {
+          "name": "official_layouts",
+          "requested": 1,
+          "errors": 0
+        },
+        {
+          "name": "asset_revision",
+          "expected": "35efbc7dedfdbeeb6e95fb749bd885d73d483e41",
+          "actual": "35efbc7dedfdbeeb6e95fb749bd885d73d483e41"
+        },
+        {
+          "name": "gpus",
+          "value": "0, NVIDIA L20, 46068 MiB, 11374 MiB\n1, NVIDIA L20, 46068 MiB, 37322 MiB\n2, NVIDIA L20, 46068 MiB, 44994 MiB"
+        }
+      ],
+      "next_validation": "Run a native probe, then one full fresh episode for each strategy before a campaign"
+    },
+    "empty_machine_bootstrap_tested": false
+  },
+  "cleanup": {
+    "credentials": {
+      "temporary_auth_directories_removed": 1,
+      "original_auth_home_modified": false,
+      "private_runtime_proxy_references_removed": true
+    },
+    "relay": [
+      {
+        "pid": 95647,
+        "kind": "validation_tunnel"
+      },
+      {
+        "pid": 7104,
+        "kind": "validation_proxy"
+      }
+    ]
+  },
+  "remaining_checks": [
+    "Recipient GPU/driver/headless renderer",
+    "Released RoboProbe model episode with Responses API endpoint/key",
+    "Empty-machine bootstrap and complete reconstruction installation route"
+  ],
+  "notes": [
+    "Early validation logs retain original outcomes and are not part of the formal experiment.",
+    "Earlier probes and short GT/no-CodeWorld episodes had remote robot-material loading warnings under the temporary model-only proxy. The extracted-package probe and final fresh Ours run had zero USD_MDL errors after direct material access.",
+    "Ours had three rejected model API calls (gripper mode/pose schema). Subsequent valid requests and scoring continued. These are not task successes.",
+    "FIT_CHECKS_PASSED is the internal fit-review result; build PASS verifies source/mesh binding. Neither is independent geometry generalization or benchmark task success."
+  ]
+}

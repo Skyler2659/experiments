@@ -1,0 +1,6 @@
+{
+  "Assets": {"url":"https://huggingface.co/datasets/RoboDojo-Benchmark/RoboDojo","commit":"35efbc7dedfdbeeb6e95fb749bd885d73d483e41"},
+  "IsaacLab": {"url":"https://github.com/yuechen0614/IsaacLab.git","commit":"afca7b09d60d8beb9c1cb28b43066499940b969b"},
+  "curobo": {"url":"https://github.com/yuechen0614/curobo.git","commit":"d17b54ce32cba095c0b000c4c58777075d11de0e"},
+  "sam2": {"url":"https://github.com/facebookresearch/sam2.git","commit":"2b90b9f5ceec907a1c18123530e92e794ad901a4"}
+}

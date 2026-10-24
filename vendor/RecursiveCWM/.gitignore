@@ -1,0 +1,9 @@
+__pycache__/
+runs/
+node_modules/
+*.log
+.pytest_cache/
+runtime/
+.codex-home/
+.venv/
+.render-tools/

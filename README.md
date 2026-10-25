@@ -23,9 +23,36 @@ $PY -m robodojo_benchmark doctor --campaign campaigns/main --runtime experiments
 # 单个实验
 bash experiments/robodojo/run_one.sh ours build_tower 1 0
 
-# 或：批量运行尚未完成的队列（每块 GPU 一个 worker）
-$PY -m robodojo_benchmark worker --campaign campaigns/main --runtime experiments/robodojo/runtime.local.json --gpu 0
+# 或：批量运行尚未完成的队列（每卡并发可选 1、2、4，默认 1）
+$PY -m robodojo_benchmark worker --campaign campaigns/main --runtime experiments/robodojo/runtime.local.json --gpu 0 --tasks-per-gpu 2
 ```
+
+
+`--tasks-per-gpu 1` 为单任务，`2` 为双任务，`4` 为四任务。一个命令自动启动对应数量的独立 worker；每个任务保持独立的仿真、Agent 和输出目录，共享队列会避免重复领取。`--max-jobs` 限制该命令下所有 worker 合计领取的任务数。
+
+8 卡运行示例（每卡双任务，共最多 16 个并发；将 `TASKS_PER_GPU` 改为 `1` 或 `4` 可切换为 8 或 32 个）：
+
+```bash
+PY=.venv-benchmark/bin/python
+TASKS_PER_GPU=2
+mkdir -p campaigns/main/worker_logs
+pids=()
+for gpu in {0..7}; do
+  $PY -m robodojo_benchmark worker --campaign campaigns/main \
+    --runtime experiments/robodojo/runtime.local.json \
+    --gpu "$gpu" --tasks-per-gpu "$TASKS_PER_GPU" \
+    > "campaigns/main/worker_logs/gpu-${gpu}.log" 2>&1 &
+  pids+=("$!")
+done
+# 保存此终端中的 pids；需要停止时执行：kill "${pids[@]}"
+failed=0
+for pid in "${pids[@]}"; do
+  wait "$pid" || failed=1
+done
+echo "worker_exit_failed=$failed"
+```
+
+以上多卡示例使用 Bash。同卡只启动一个这样的命令；再次启动同卡命令会等待整卡锁，不会叠加并发。切换并发数前先停止旧命令，再以新参数启动；已完成任务会保留。单任务 `run` 和环境 `probe` 仍独占该卡。并发槽位贯穿任务执行和视频导出；基础设施错误会停止该卡继续领取新任务，已运行任务正常收尾。1/2/4 是调度选项，实际吞吐和显存容量需在目标机器验证。
 
 ## 实验结果
 

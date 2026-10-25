@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import collections
-import fcntl
 import json
 from pathlib import Path
 import signal
@@ -27,6 +26,9 @@ def main():
         p.add_argument("--strategy", choices=STRATEGIES); p.add_argument("--task"); p.add_argument("--sample", type=int)
         if command != "doctor":
             p.add_argument("--gpu", default="0"); p.add_argument("--shard"); p.add_argument("--max-jobs", type=int)
+        if command == "worker":
+            p.add_argument("--tasks-per-gpu", type=int, choices=(1, 2, 4), default=1,
+                           help="Concurrent episodes on this GPU (default: 1)")
     p = commands.add_parser("probe")
     p.add_argument("--runtime", required=True); p.add_argument("--output", required=True)
     p.add_argument("--suite", help="Optional initialization-only suite; never included in task success statistics")
@@ -68,7 +70,7 @@ def main():
             if args.state and row['status'] != args.state:continue
             print(f"{key}\t{row['status']}\tattempt={row['attempt']}\t{j['native_task']}\tlayout={j['layout_id']}\teval_seed={j['eval_seed']}")
         return
-    from .worker import runtime_config, execute_job, finish_job
+    from .worker import runtime_config
     runtime = runtime_config(args.runtime)
     if args.command == "doctor":
         from .doctor import doctor
@@ -79,27 +81,15 @@ def main():
     def interrupted(*_):
         raise KeyboardInterrupt("Worker interrupted")
     signal.signal(signal.SIGTERM, interrupted)
-    maximum = 1 if args.command == 'run' else (len(candidates) if args.command == 'probe' else (args.max_jobs or len(candidates)))
-    # One worker per physical GPU; other GPUs and CPU policy services run independently.
-    lock_path = Path(runtime.get("gpu_lock_directory", "/tmp")) / ("codeworld-benchmark-gpu-" + str(args.gpu).replace("/", "_") + ".lock")
-    count, failed = 0, False
-    with lock_path.open("a") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
-        while count < maximum:
-            job = c.claim(candidates)
-            if job is None:
-                break
-            print(json.dumps({"started": job["job_id"], "attempt": job["attempt"]}), flush=True)
-            result = execute_job(c, job, runtime, args.gpu, probe=args.command == "probe")
-            finish_job(c, job, result)
-            print(json.dumps(result), flush=True)
-            failed |= result["status"] in ("INFRA_ERROR", "UNSTABLE", "INTERRUPTED")
-            count += 1
-            if result["status"] in ("INFRA_ERROR", "INTERRUPTED"):
-                break  # Fix a broken worker/credential rather than failing the remaining queue.
-    if not count:
-        print("No pending job matches; completed attempts are preserved")
-    raise SystemExit(1 if failed else 0)
+    maximum = 1 if args.command == 'run' else (len(candidates) if args.command == 'probe' else (args.max_jobs if args.max_jobs is not None else len(candidates)))
+    if getattr(args, "max_jobs", None) is not None and args.max_jobs < 1:
+        parser.error("--max-jobs must be positive")
+    from .scheduler import run_workers
+    code = run_workers(c, candidates, runtime, args.gpu,
+                       tasks_per_gpu=getattr(args, "tasks_per_gpu", 1),
+                       max_jobs=maximum, probe=args.command == "probe")
+    raise SystemExit(code)
+
 
 
 if __name__ == "__main__":

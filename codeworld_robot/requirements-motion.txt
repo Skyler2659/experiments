@@ -1,3 +1,0 @@
-# Optional RoboDojo full-arm checks and bounded trajectories (Python 3.11 runtime).
-python-fcl==0.7.0.11
-ruckig==0.19.4

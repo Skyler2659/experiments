@@ -1,110 +1,76 @@
-# CodeWorld
+# WorldRUA
 
-以下命令均在仓库根目录执行；首次使用先完成文末的依赖安装。
+Ours + PyRUA：让机器人 Agent 使用可查询、可更新的 CodeWorld。
 
-## 接入 API Key
+## 1. 导入 API key
 
-配置支持图片输入和 Responses API 的服务，默认模型为 `gpt-6-astra` / `high`。服务地址不带 `/responses`；Codex 登录额度不能代替 RoboProbe 所需的 API Key。
-
-```bash
-export OPENAI_API_KEY='你的API密钥'
-.venv-benchmark/bin/python experiments/robodojo/configure_api.py --base-url https://你的服务/v1
-```
-
-## 启动实验
-
-首次初始化并检查环境，然后选择单个实验或批量运行。单个实验参数依次为：策略、任务、样本（1–50）、GPU。
+在实验服务器安装 Codex CLI 后，使用独立认证目录（[官方认证说明](https://learn.chatgpt.com/docs/auth)）：
 
 ```bash
-PY=.venv-benchmark/bin/python
-$PY -m robodojo_benchmark init --output campaigns/main  # 仅首次执行
-$PY -m robodojo_benchmark doctor --campaign campaigns/main --runtime experiments/robodojo/runtime.local.json
-
-# 单个实验
-bash experiments/robodojo/run_one.sh ours build_tower 1 0
-
-# 或：批量运行尚未完成的队列（每卡并发可选 1、2、4，默认 1）
-$PY -m robodojo_benchmark worker --campaign campaigns/main --runtime experiments/robodojo/runtime.local.json --gpu 0 --tasks-per-gpu 2
+export WORLD_RUA_AUTH_HOME="$HOME/.worldrua-auth"
+export OPENAI_API_KEY="你的 API key"
+printenv OPENAI_API_KEY | CODEX_HOME="$WORLD_RUA_AUTH_HOME" codex -c 'cli_auth_credentials_store="file"' login --with-api-key
 ```
 
+运行脚本只清理各样本的认证副本，不退出原账号。
 
-`--tasks-per-gpu 1` 为单任务，`2` 为双任务，`4` 为四任务。一个命令自动启动对应数量的独立 worker；每个任务保持独立的仿真、Agent 和输出目录，共享队列会避免重复领取。`--max-jobs` 限制该命令下所有 worker 合计领取的任务数。
+## 2. 开跑实验
 
-8 卡运行示例（每卡双任务，共最多 16 个并发；将 `TASKS_PER_GPU` 改为 `1` 或 `4` 可切换为 8 或 32 个）：
+Linux + NVIDIA；先安装 RoboDojo/Isaac Sim 及资产，详见[环境准备](docs/SETUP.md)。在仓库根目录运行：
 
 ```bash
-PY=.venv-benchmark/bin/python
-TASKS_PER_GPU=2
-mkdir -p campaigns/main/worker_logs
-pids=()
-for gpu in {0..7}; do
-  $PY -m robodojo_benchmark worker --campaign campaigns/main \
-    --runtime experiments/robodojo/runtime.local.json \
-    --gpu "$gpu" --tasks-per-gpu "$TASKS_PER_GPU" \
-    > "campaigns/main/worker_logs/gpu-${gpu}.log" 2>&1 &
-  pids+=("$!")
-done
-# 保存此终端中的 pids；需要停止时执行：kill "${pids[@]}"
-failed=0
-for pid in "${pids[@]}"; do
-  wait "$pid" || failed=1
-done
-echo "worker_exit_failed=$failed"
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -c requirements/constraints-tested-linux.txt -e '.[dev,collision]'
+worldrua setup-runtime ./runtime --python python3.12
+export ROBODOJO_ROOT=/path/to/RoboDojo
+export WORLD_RUA_RUNTIME="$PWD/runtime"
+cp configs/robodojo11.example.json configs/batch.local.json
+worldrua doctor configs/batch.local.json
+worldrua run configs/batch.local.json --detach
+worldrua dashboard runs/robodojo11 --port 5191
 ```
 
-以上多卡示例使用 Bash。同卡只启动一个这样的命令；再次启动同卡命令会等待整卡锁，不会叠加并发。切换并发数前先停止旧命令，再以新参数启动；已完成任务会保留。单任务 `run` 和环境 `probe` 仍独占该卡。并发槽位贯穿任务执行和视频导出；基础设施错误会停止该卡继续领取新任务，已运行任务正常收尾。1/2/4 是调度选项，实际吞吐和显存容量需在目标机器验证。
+默认三张 L20、每卡两个样本，共六路并行。服务器本地查看 `http://127.0.0.1:5191/`，远程访问需 SSH 转发。模型断连会保留存活的仿真器续跑；队列进程退出后执行 `worldrua resume runs/robodojo11 --detach`。仿真器已死亡则不能原地恢复，见[续跑说明](docs/RECOVERY.md)。
 
-## 实验结果
+## 3. 导出什么、在哪里
 
-结果位于 `campaigns/main/runs/<任务>__<样本三位数>__<策略>/attempt_001/`。查看汇总：
+每个样本保存在 `runs/robodojo11/<task>_s<sample>/`。例如：
 
 ```bash
-.venv-benchmark/bin/python -m robodojo_benchmark summary --campaign campaigns/main
+worldrua export runs/robodojo11/build_tower_s0 --bundle --videos
 ```
 
-```text
-result.json                         运行结果与官方评分
-agent/、episode/robot_io/            Agent 记录、动作请求和回执；RoboProbe 记录在 trace/
-episode/source/、episode/geometry/   CodeWorld 生成代码与 3D 资产
-artifacts/task.mp4                   任务视频
-artifacts/codeworld_task_sync.mp4    CodeWorld 与任务同步视频
-artifacts/agent_task_sync.mp4        Agent 操作与任务同步视频
-artifacts/manifest.json              视频导出状态
-```
-
-无 CodeWorld 的策略不生成世界资产及其对比视频；GT 使用原生几何和通用世界接口，没有重建生成代码。同步视频中的世界状态随观测更新。
-
-## 依赖与安装
-
-需要 Linux、NVIDIA 驱动、支持 Isaac Sim 5.1 相机渲染的 GPU、Git/Git LFS、uv、Node.js/npm 和下载网络；H 卡兼容性需实机确认。安装器准备 Python 环境、Codex CLI、重建和视频依赖，并生成 `runtime.local.json`。
-
-```bash
-# 已有 RoboDojo / Isaac Sim 5.1 / IsaacLab 环境和官方 Assets
-bash experiments/robodojo/install.sh --sim-python /你的环境/bin/python --assets /你的Assets目录
-
-# 或：自动安装仿真环境并下载资产
-bash experiments/robodojo/install.sh --bootstrap-sim
-```
-
-## 实验与策略
-
-RoboDojo **14 个任务 × 4 种策略 × 50 个样本，共 2,800 次**。配置在 `experiments/robodojo/suite.json`；修改任务、样本或策略后初始化新的 campaign。
-
-```text
-insert_tubes          build_tower           pack_objects_into_box
-hang_mugs             fill_egg_holder       organize_table
-arrange_largest_number  swap_T              store_tools_in_toolbox
-sweep_blocks          play_stacking_toy     fill_pen_holder
-stack_bowls           deposit_coin
-```
-
-| 策略 ID | 内容 |
+| 内容 | 样本目录内路径 |
 |---|---|
-| `roboprobe_l3` | RoboProbe-L3：原生 RGB＋机器人状态 |
-| `ours_no_codeworld` | Ours − CodeWorld：RGB-D，无持久三维世界 |
-| `ours` | Ours：RGB-D 重建＋CodeWorld |
-| `gt_codeworld` | Ours＋GT CodeWorld：原生几何，观测时更新真实位姿 |
+| 带材质的当前 3D 场景，隐藏机器人与相机 | `exports/current_scene.glb` |
+| 初始场景（存在时）、世界代码/资产、Agent/CodeWorld 日志及观测 | `exports/initial_scene.glb`、`exports/artifacts.tar.gz` |
+| 连续任务视频 | `episode/bench/eval_result/`，导出时复制到 `exports/` |
+| 真实画面 + 同步历史 CodeWorld 视频 | `videos/comparison.mp4`（观测序列，2 fps） |
+| 评分、耗时和原始 Agent 记录 | `episode/result.json`、`episode/codex_events.jsonl` |
 
-四组使用相同的公开任务 recipe，沿用官方布局、动作预算和评分；Ours 系列使用增强 RGB-D 观测，GT 额外获得真实几何与状态。
+任务 + Agent 日志的合成视频尚未实现；日志已导出。[完整资产说明](docs/ARTIFACTS.md)。
 
-开发、模块边界与验证方式见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+## 4. 跑哪 11 个实验
+
+按成绩 Excel 的 11 类任务配置，见 [robodojo11.example.json](configs/robodojo11.example.json)：
+
+| 任务 | 配置名称 |
+|---|---|
+| 搭塔 | `build_tower` |
+| 插管 | `insert_tubes` |
+| 装箱 | `pack_objects_into_box` |
+| 按大小排列套娃 | `sort_nesting_dolls_by_size` |
+| 叠碗 | `stack_bowls` |
+| 交换积木 | `swap_blocks` |
+| 排列最大数字 | `arrange_largest_number` |
+| 求解方程 | `solve_equation` |
+| 套柱玩具 | `play_stacking_toy` |
+| 挂杯子 | `hang_mugs` |
+| 做吐司 | `make_toast` |
+
+示例每类 `samples: [0,1,2]`，共 33 次；正式样本数修改配置。交换积木使用修复按钮复位的环境，补丁及说明见[环境准备](docs/SETUP.md#qualification)。
+
+## 5. 单个实验的耗时与显存
+
+未发现中断记录的阶段均值：重建 **32.4 分钟**（14 次），策略推理/执行 **46.1 分钟**（17 次，含动作与反馈），全新重建总耗时 **76.6 分钟**（5 次）；显存平均 **11.60 GiB**、采样最大 **14.39 GiB**（搭塔/挂杯子 5 次复用资产运行的整卡占用估计）。

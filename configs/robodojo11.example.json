@@ -1,0 +1,111 @@
+{
+  "output": "../runs/robodojo11",
+  "robodojo_root": "${ROBODOJO_ROOT}",
+  "runtime": "${WORLD_RUA_RUNTIME}",
+  "auth_home": "${WORLD_RUA_AUTH_HOME}",
+  "codex": "codex",
+  "gpus": [
+    0,
+    1,
+    2
+  ],
+  "slots_per_gpu": 2,
+  "min_free_mib": 14500,
+  "launch_interval_s": 35,
+  "model": "gpt-6-astra",
+  "reasoning": "high",
+  "max_turns": 300,
+  "eval_seed": 0,
+  "truth_audit": false,
+  "environment": {},
+  "tasks": [
+    {
+      "task": "build_tower",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "insert_tubes",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "pack_objects_into_box",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "sort_nesting_dolls_by_size",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "stack_bowls",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "swap_blocks",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "arrange_largest_number",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "solve_equation",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "play_stacking_toy",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "hang_mugs",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "task": "make_toast",
+      "samples": [
+        0,
+        1,
+        2
+      ]
+    }
+  ]
+}

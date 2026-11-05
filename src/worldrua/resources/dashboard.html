@@ -1,0 +1,17 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WorldRUA · Experiments</title><style>
+body{font:15px system-ui;background:#f4f5f2;color:#1d3430;margin:32px auto;padding:0 20px;max-width:1500px}h1{margin-bottom:6px}#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}article{background:white;border:1px solid #dde4dd;border-radius:14px;padding:18px}img{width:100%;border-radius:7px}small{color:#62706c}a{color:#1a6966;margin-right:12px}#health{margin:16px 0 25px}pre{white-space:pre-wrap;font:12px monospace}.failed{color:#a64432}
+</style><h1>WorldRUA</h1><small>Live observations · official outcomes · recorded world states</small><div id="health">Loading…</div><main id="grid"></main><script>
+const cards=new Map();
+const text=(tag,value)=>{const e=document.createElement(tag);e.textContent=value;return e};
+async function update(){try{const s=await(await fetch('/api/status',{cache:'no-store'})).json();
+document.querySelector('#health').textContent=`${s.runs.filter(r=>r.status==='FINISHED').length}/${s.runs.length} completed · telemetry ${Math.round(s.telemetry_age_s)}s old${s.telemetry_age_s>30?' · delayed':''}${s.paused?' · queue paused':''}`;
+for(const r of s.runs){let a=cards.get(r.id);if(!a){a=document.createElement('article');cards.set(r.id,a);document.querySelector('#grid').append(a)}
+a.replaceChildren(text('h3',r.id),text('p',`${r.status} · ${r.stage||'QUEUED'} · GPU ${r.gpu??'—'} · step ${r.step??'—'}`));
+if(typeof r.success==='boolean')a.append(text('p',`Official success: ${r.success}`));
+if(r.error)a.append(text('pre',r.error));if(r.recovery?.length)a.append(text('p',r.recovery.map(x=>x.status).join(', ')));
+if(r.images?.cam_head){const im=document.createElement('img');im.src='/media/'+r.images.cam_head+'?t='+r.image_time;a.append(im,text('small','Image age: '+Math.round(Date.now()/1000-r.image_time)+'s'))}
+if(r.comparisons?.cam_head){const im=document.createElement('img');im.src='/media/'+r.comparisons.cam_head+'?t='+r.comparison_time;a.append(text('small','World comparison · step '+r.comparison_step),im)}
+const links=document.createElement('p');for(const v of r.videos||[]){const link=text('a',v.split('/').pop());link.href='/media/'+v;link.target='_blank';links.append(link)}a.append(links)}
+}catch(e){document.querySelector('#health').textContent='Telemetry unavailable: '+e.message}}update();setInterval(update,5000);
+</script></html>

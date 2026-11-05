@@ -1,0 +1,152 @@
+{
+  "frame": "pyrualean_world",
+  "robot_asset": {
+    "urdf": "${ROBODOJO_ROOT}/Assets/Robots/x5/X5A.urdf",
+    "packages": {},
+    "instances": [
+      {
+        "T_W_base": [
+          [
+            0,
+            -1,
+            0,
+            -0.3
+          ],
+          [
+            1,
+            0,
+            0,
+            -0.45
+          ],
+          [
+            0,
+            0,
+            1,
+            0.765
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "joints": {
+          "joint1": {
+            "state": "left.joints.0"
+          },
+          "joint2": {
+            "state": "left.joints.1"
+          },
+          "joint3": {
+            "state": "left.joints.2"
+          },
+          "joint4": {
+            "state": "left.joints.3"
+          },
+          "joint5": {
+            "state": "left.joints.4"
+          },
+          "joint6": {
+            "state": "left.joints.5"
+          },
+          "joint7": {
+            "state": "left.gripper",
+            "scale": 0.054,
+            "offset": -0.01
+          },
+          "joint8": {
+            "state": "left.gripper",
+            "scale": 0.054,
+            "offset": -0.01
+          }
+        },
+        "validate_link": "link6",
+        "position_state": "left.eef_pos",
+        "max_position_error_m": 0.003
+      },
+      {
+        "T_W_base": [
+          [
+            0,
+            -1,
+            0,
+            0.3
+          ],
+          [
+            1,
+            0,
+            0,
+            -0.45
+          ],
+          [
+            0,
+            0,
+            1,
+            0.765
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ]
+        ],
+        "joints": {
+          "joint1": {
+            "state": "right.joints.0"
+          },
+          "joint2": {
+            "state": "right.joints.1"
+          },
+          "joint3": {
+            "state": "right.joints.2"
+          },
+          "joint4": {
+            "state": "right.joints.3"
+          },
+          "joint5": {
+            "state": "right.joints.4"
+          },
+          "joint6": {
+            "state": "right.joints.5"
+          },
+          "joint7": {
+            "state": "right.gripper",
+            "scale": 0.054,
+            "offset": -0.01
+          },
+          "joint8": {
+            "state": "right.gripper",
+            "scale": 0.054,
+            "offset": -0.01
+          }
+        },
+        "validate_link": "link6",
+        "position_state": "right.eef_pos",
+        "max_position_error_m": 0.003
+      }
+    ]
+  },
+  "reconstruction": {
+    "runtime": "${WORLD_RUA_RUNTIME}",
+    "model": "gpt-6-astra",
+    "reasoning": "high",
+    "max_depth": 4,
+    "max_cycles": 3,
+    "timeout_s": 14400,
+    "sandbox": "danger-full-access",
+    "view_ids": [
+      "cam_head",
+      "cam_left_wrist",
+      "cam_right_wrist"
+    ]
+  },
+  "height_alignment": {},
+  "perception": "codeworld",
+  "collision": {
+    "urdf": "${ROBODOJO_ROOT}/Assets/Robots/x5/X5A.urdf",
+    "max_joint_increment_rad": 0.025,
+    "max_finger_increment_m": 0.002
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "profile": "robodojo_x5_observed_camera_support",
+  "frame": "pyrualean_world",
+  "reference_camera": {
+    "view_id": "cam_head",
+    "T_W_C": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -0.8660254037844386,
+        0.5000000000000001,
+        -0.41
+      ],
+      [
+        0.0,
+        -0.5000000000000001,
+        -0.8660254037844386,
+        1.308
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "obstacles": [
+    {
+      "object_id": "camera_support",
+      "label": "Fixed central camera support (RGB estimate)",
+      "basis": "saved_rgb_and_public_camera_calibration_estimate",
+      "evidence": {
+        "observation_id": "b25848bad4604421a459edf8fe999ffb",
+        "view": "cam_head",
+        "rgb_sha256": "77248f8fcd909753d83b4c324ffb6bf9ac7b5b055b9c1b728b905975a22f503f",
+        "plate_front_pixels": [
+          [
+            226,
+            418
+          ],
+          [
+            414,
+            418
+          ]
+        ],
+        "bracket_front_pixels": [
+          [
+            298,
+            429
+          ],
+          [
+            342,
+            429
+          ]
+        ],
+        "table_height_prior_m": 0.765,
+        "estimated_plate_top_m": 0.77,
+        "method": "RGB pixel rays intersect estimated base top; mast/mount completion from visible bracket and public camera pose"
+      },
+      "unknowns": [
+        "Base rear extent, plate thickness, mast section and upper mount are approximate completion hypotheses; obscured in saved RGB. No private simulator mesh/pose used.",
+        "Geometry is not metrically certified; inspect RGB feedback for residual contact."
+      ],
+      "boxes": [
+        {
+          "name": "base_plate",
+          "size_m": [
+            0.2987740545372307,
+            0.1,
+            0.005
+          ],
+          "T_object_box": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.47602934224919824
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.7675
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "name": "mounting_bracket",
+          "size_m": [
+            0.0688079398632659,
+            0.045,
+            0.035
+          ],
+          "T_object_box": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.4556704375333079
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.7875
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "name": "camera_mast",
+          "size_m": [
+            0.04,
+            0.04,
+            0.503
+          ],
+          "T_object_box": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.4556704375333079
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.0565
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        },
+        {
+          "name": "camera_mount",
+          "size_m": [
+            0.07,
+            0.09,
+            0.035
+          ],
+          "T_object_box": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              -0.43
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              1.308
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

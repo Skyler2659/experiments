@@ -2,7 +2,7 @@
 
 Ours + PyRUA：让机器人 Agent 使用可查询、可更新的 CodeWorld。
 
-## 1. 导入 API key
+## 1. API 密钥配置
 
 在实验服务器安装 Codex CLI 后，使用独立认证目录（[官方认证说明](https://learn.chatgpt.com/docs/auth)）：
 
@@ -14,7 +14,7 @@ printenv OPENAI_API_KEY | CODEX_HOME="$WORLD_RUA_AUTH_HOME" codex -c 'cli_auth_c
 
 运行脚本只清理各样本的认证副本，不退出原账号。
 
-## 2. 开跑实验
+## 2. 环境部署与实验运行
 
 Linux + NVIDIA；先安装 RoboDojo/Isaac Sim 及资产，详见[环境准备](docs/SETUP.md)。在仓库根目录运行：
 
@@ -33,7 +33,7 @@ worldrua dashboard runs/robodojo11 --port 5191
 
 默认三张 L20、每卡两个样本，共六路并行。服务器本地查看 `http://127.0.0.1:5191/`，远程访问需 SSH 转发。模型断连会保留存活的仿真器续跑；队列进程退出后执行 `worldrua resume runs/robodojo11 --detach`。仿真器已死亡则不能原地恢复，见[续跑说明](docs/RECOVERY.md)。
 
-## 3. 导出什么、在哪里
+## 3. 实验产物与导出路径
 
 每个样本保存在 `runs/robodojo11/<task>_s<sample>/`。例如：
 
@@ -51,7 +51,7 @@ worldrua export runs/robodojo11/build_tower_s0 --bundle --videos
 
 任务 + Agent 日志的合成视频尚未实现；日志已导出。[完整资产说明](docs/ARTIFACTS.md)。
 
-## 4. 跑哪 11 个实验
+## 4. 实验任务清单
 
 按成绩 Excel 的 11 类任务配置，见 [robodojo11.example.json](configs/robodojo11.example.json)：
 
@@ -71,6 +71,6 @@ worldrua export runs/robodojo11/build_tower_s0 --bundle --videos
 
 示例每类 `samples: [0,1,2]`，共 33 次；正式样本数修改配置。交换积木使用修复按钮复位的环境，补丁及说明见[环境准备](docs/SETUP.md#qualification)。
 
-## 5. 单个实验的耗时与显存
+## 5. 实验耗时与显存占用
 
-未发现中断记录的阶段均值：重建 **32.4 分钟**（14 次），策略推理/执行 **46.1 分钟**（17 次，含动作与反馈），全新重建总耗时 **76.6 分钟**（5 次）；显存平均 **11.60 GiB**、采样最大 **14.39 GiB**（搭塔/挂杯子 5 次复用资产运行的整卡占用估计）。
+未发现中断记录的阶段均值：重建 **32.4 分钟**，策略推理/执行 **46.1 分钟**（含动作与反馈），全新重建总耗时 **76.6 分钟**；显存平均 **11.60 GiB**、采样最大 **14.39 GiB**（搭塔/挂杯子复用资产运行的整卡占用估计）。

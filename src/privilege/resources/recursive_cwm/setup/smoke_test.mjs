@@ -20,7 +20,10 @@ const server = http.createServer((q, res) => { const p = path.join(root, decodeU
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const { chromium } = await import(path.join(root, '.render-tools/node_modules/playwright/index.mjs'));
 let browser;
-try { browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] }); }
+const browserEnv = {...process.env};
+const libraries = path.join(root, '.system-libs/usr/lib/x86_64-linux-gnu');
+if (fs.existsSync(libraries)) browserEnv.LD_LIBRARY_PATH = libraries + ':' + (browserEnv.LD_LIBRARY_PATH || '');
+try { browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'], env: browserEnv }); }
 catch (e) { console.error('Chromium failed to launch. Missing system libraries? Run: sudo npx playwright install-deps chromium  (in ' + root + '/.render-tools)\n' + String(e).slice(0, 400)); process.exit(1); }
 const page = await browser.newPage({ viewport: { width: 320, height: 200 } });
 const errors = []; page.on('pageerror', e => errors.push(String(e)));

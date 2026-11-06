@@ -56,3 +56,14 @@ XPolicyLab server. The updated source suite passed **475 tests, 6 skipped** on m
 `pip check` reported no broken requirements. A newly created rendering runtime
 installed its own Chromium and successfully rendered the setup test box. These checks
 still do not replace a full target-server robot episode or validate model permissions.
+
+Linux GitHub Actions then passed **479 tests, 2 browser fixtures skipped**, on both
+Python 3.10 and 3.12, including installation, wheel/sdist builds and release checks
+([run](https://github.com/Skyler2659/experiments/actions/runs/42135404924)).
+An independent clone also installed and built successfully. On the existing L20 server,
+Agent/SAM3 imports, CUDA availability, simulator package discovery and all 33 requested
+layout files passed the new probes. The rendering check exposed that its library search
+path differed from the reconstruction runner; the smoke test and video renderer now
+honor runtime-relative `.system-libs` too. The server's real Chromium test then passed.
+A fresh macOS runtime also exported a two-frame RGB/CodeWorld video successfully.
+No account credentials were copied for these checks and no robot episode was launched.

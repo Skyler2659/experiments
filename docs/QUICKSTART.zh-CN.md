@@ -7,19 +7,20 @@ WorldRUA 是最新 Ours + PyRUA 的项目名。代码以服务器最后一批已
 ## 学长需要准备的环境
 
 - Linux + NVIDIA GPU；之前验证过三张 L20、每卡两个样本。
-- 已能独立启动的 RoboDojo、XPolicyLab、Isaac Sim 和官方资产。
-- Python 3.12 的 Agent 环境，以及独立的 Node/Chromium 重建运行环境。
+- 已能独立启动的 RoboDojo、XPolicyLab、Isaac Sim、Isaac Lab 和官方资产。
+- Python 3.12 的 Agent 环境（含 CUDA PyTorch、SAM3 与权重），以及独立的 Node/Chromium 重建运行环境。
 - 在服务器上单独登录的 Codex 账号；登录目录放在仓库和实验输出之外。
 
-先按英文 [安装说明](SETUP.md) 安装，再复制 `configs/robodojo.example.json` 为
+先按英文 [安装说明](SETUP.md) 安装，再复制 `configs/robodojo11.example.json` 为
 `configs/batch.local.json`，填写路径、任务和样本编号。任务名称必须与 RoboDojo 配置文件
-一致；样本编号表示 layout，`eval_seed` 是布局集合编号。
+一致；样本编号表示 layout，`eval_seed` 是布局集合编号。按 README 设置
+`ROBODOJO_PYTHON_BIN` 与 `SAM3_CHECKPOINT_PATH`，分别选择仿真环境及分割权重。
 
 ```bash
 worldrua doctor configs/batch.local.json
 worldrua stage configs/batch.local.json
-worldrua resume runs/robodojo_batch --detach
-worldrua dashboard runs/robodojo_batch --port 5191
+worldrua resume runs/robodojo11 --detach
+worldrua dashboard runs/robodojo11 --port 5191
 ```
 
 `stage` 不启动仿真器。也可以用 `run CONFIG --detach` 一次完成新建和启动。
@@ -28,7 +29,7 @@ worldrua dashboard runs/robodojo_batch --port 5191
 浏览器通过 SSH 隧道查看服务器的 localhost 端口。需要实时世界对比图时，另一个终端运行：
 
 ```bash
-worldrua comparisons runs/robodojo_batch
+worldrua comparisons runs/robodojo11
 ```
 
 ## 续跑与结果
@@ -37,13 +38,13 @@ worldrua comparisons runs/robodojo_batch
 等待后恢复同一个会话。仿真器本身被杀死时不能无损恢复，代码会标记中断，不自动
 把物理任务重跑一遍。`FINISHED` 是正常结束，不等于成功，成功看 `success` 和原生评测。
 
-每卡三个并行尚未压测。普通任务可先按重建 20–45 分钟、执行 10–50 分钟估算，
-长序列任务单独预留时间。输出目录包含实测计时，历史等待不要混入有效耗时。
+每卡三个并行尚未压测。耗时与显存均值见 [README](../README.md)，
+输出目录保留逐次计时，历史等待不要混入有效耗时。
 
 ## 交付产物
 
 ```bash
-worldrua export runs/robodojo_batch/stack_bowls_s0 --bundle --videos
+worldrua export runs/robodojo11/stack_bowls_s0 --bundle --videos
 ```
 
 会导出带材质的当前场景 GLB、原生任务录像、日志和世界状态归档，以及逐观测帧的

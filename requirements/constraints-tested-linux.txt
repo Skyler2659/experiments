@@ -9,5 +9,8 @@ rtree==1.4.1
 mcp==1.30.0
 uvicorn==0.54.0
 httpx==0.28.1
-websockets==17.4
+websockets==17.4; python_version >= "3.11"
+# 17.4 requires Python >=3.11; retain the same websocket APIs on Python 3.10.
+websockets==15.0.1; python_version < "3.11"
 msgpack-numpy==0.4.8
+opencv-python-headless==4.11.0.86

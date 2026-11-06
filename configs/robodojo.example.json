@@ -4,7 +4,11 @@
   "runtime": "${WORLD_RUA_RUNTIME}",
   "auth_home": "${WORLD_RUA_AUTH_HOME}",
   "codex": "codex",
-  "gpus": [0, 1, 2],
+  "gpus": [
+    0,
+    1,
+    2
+  ],
   "slots_per_gpu": 2,
   "min_free_mib": 14500,
   "launch_interval_s": 35,
@@ -13,10 +17,31 @@
   "max_turns": 300,
   "eval_seed": 0,
   "truth_audit": false,
-  "environment": {},
+  "environment": {
+    "PATH": "${ROBODOJO_PYTHON_BIN}:${PATH}",
+    "SAM3_CHECKPOINT_PATH": "${SAM3_CHECKPOINT_PATH}"
+  },
   "tasks": [
-    {"task": "sort_nesting_dolls_by_size", "samples": [0, 1]},
-    {"task": "stack_bowls", "samples": [0, 1]},
-    {"task": "play_stacking_toy", "samples": [0, 1]}
+    {
+      "task": "sort_nesting_dolls_by_size",
+      "samples": [
+        0,
+        1
+      ]
+    },
+    {
+      "task": "stack_bowls",
+      "samples": [
+        0,
+        1
+      ]
+    },
+    {
+      "task": "play_stacking_toy",
+      "samples": [
+        0,
+        1
+      ]
+    }
   ]
 }

@@ -88,36 +88,7 @@ def load(path):
 
 
 def check(cfg):
-    """Check local dependencies without booting a simulator or contacting the model."""
-    failures = []
-    paths = [
-        Path(cfg["python"]),
-        Path(cfg["codex"]),
-        Path(cfg["python"]).parent / "worldrua-codex",
-        Path(cfg["robodojo_root"]) / "src/eval_client/main.py",
-        Path(cfg["robodojo_root"]) / "Assets/Robots/x5/X5A.urdf",
-        Path(cfg["xpolicylab_root"]) / "client_server/ws/model_server.py",
-        Path(cfg["auth_home"]) / "auth.json",
-    ]
-    paths += [
-        Path(cfg["runtime"]) / x
-        for x in (
-            ".venv/bin/python",
-            ".render-tools/node/bin/node",
-            ".render-tools/node_modules/three/build/three.module.js",
-            ".render-tools/node_modules/playwright/index.mjs",
-        )
-    ]
-    paths += [
-        Path(cfg["robodojo_root"]) / "task/RoboDojo/config" / (r["task"] + ".yml")
-        for r in cfg["jobs"]
-    ]
-    for path in paths:
-        if not path.is_file():
-            failures.append("Missing: " + str(path))
-    for module in ("fcl", "rtree", "mcp", "msgpack_numpy", "websockets"):
-        import importlib.util
+    """Check the configured deployment without starting a robot or contacting the model."""
+    from .preflight import check as deployment_check
 
-        if importlib.util.find_spec(module) is None:
-            failures.append("Missing Python module: " + module)
-    return failures
+    return deployment_check(cfg)

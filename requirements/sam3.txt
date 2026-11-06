@@ -1,0 +1,7 @@
+# Install the matching CUDA wheels first (see docs/SETUP.md).
+torch==2.7.0
+torchvision==0.22.0
+sam3 @ git+https://github.com/RLinf/sam3.git@c1f6b1e83967c912f675d8975d437ccdc41e17d8
+einops>=0.8,<0.9
+pycocotools>=2.0.9,<3
+psutil>=5.9,<8

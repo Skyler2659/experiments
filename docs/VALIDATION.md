@@ -37,3 +37,22 @@ Known limits are documented in RECOVERY.md and ARTIFACTS.md. In particular, simu
 death has no lossless physics resume, and task-plus-Agent-log video composition is
 not implemented. The tested Linux constraints reproduce the host package versions;
 they do not specify every simulator, system driver or external benchmark revision.
+
+## Fresh deployment audit — 2026-11-06
+
+The first GitHub Actions run exposed a Python 3.10 installation failure:
+websockets 17.4 requires Python >=3.11. The constraint now selects 15.0.1 on 3.10;
+3.11/3.12 keep the tested 17.4. CI runs both versions without fail-fast cancellation.
+
+The audit also found missing OpenCV/h5py dependencies in the XPolicyLab host import
+chain, undocumented SAM3/CUDA/weight requirements, and an inherited PATH that could
+launch the simulator with the Agent Python. The requirements, examples and setup
+instructions now cover those dependencies and select the simulator Python explicitly.
+`doctor` probes both environments, requested layouts, CUDA and actual WebGL rendering.
+It does not send a model request or boot a simulator.
+
+A separate Python 3.12 environment installed the project and imported the real
+XPolicyLab server. The updated source suite passed **475 tests, 6 skipped** on macOS;
+`pip check` reported no broken requirements. A newly created rendering runtime
+installed its own Chromium and successfully rendered the setup test box. These checks
+still do not replace a full target-server robot episode or validate model permissions.

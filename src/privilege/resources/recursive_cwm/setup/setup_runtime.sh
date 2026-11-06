@@ -86,9 +86,9 @@ echo "playwright: $(node -p "require('./node_modules/playwright/package.json').v
 # 4. headless Chromium
 export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}"
 mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"
-if ! ls -d "$PLAYWRIGHT_BROWSERS_PATH"/chromium-* >/dev/null 2>&1; then
-  npx --no-install playwright install chromium
-fi
+# Playwright skips an already-installed matching browser. A different Chromium
+# revision in this directory must not suppress installation of the required one.
+npx --no-install playwright install chromium
 echo "chromium: $(ls -d "$PLAYWRIGHT_BROWSERS_PATH"/chromium-* | head -1)"
 # Shared libraries Chromium needs (libnss3, libatk, libgbm, ...): if the smoke test below fails to launch the browser,
 # run once with root:  sudo npx playwright install-deps chromium      (in $ROOT/.render-tools)

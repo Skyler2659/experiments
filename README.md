@@ -16,20 +16,33 @@ printenv OPENAI_API_KEY | CODEX_HOME="$WORLD_RUA_AUTH_HOME" codex -c 'cli_auth_c
 
 ## 2. 环境部署与实验运行
 
-Linux + NVIDIA；先安装 RoboDojo/Isaac Sim 及资产，详见[环境准备](docs/SETUP.md)。在仓库根目录运行：
+Linux + NVIDIA，推荐 Python 3.12。先按[环境准备](docs/SETUP.md)安装 RoboDojo/Isaac Sim、Isaac Lab、任务资产及 Codex CLI；Agent 与仿真器使用各自的 Python 环境。首次获取代码：
+
+```bash
+git clone https://github.com/Skyler2659/experiments.git WorldRUA
+cd WorldRUA
+```
+
+在仓库根目录运行（CUDA 12.8 的已用版本组合）：
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -c requirements/constraints-tested-linux.txt -e '.[dev,collision]'
+python -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+python scripts/install_sam3.py
 worldrua setup-runtime ./runtime --python python3.12
 export ROBODOJO_ROOT=/path/to/RoboDojo
+export ROBODOJO_PYTHON_BIN=/path/to/robodojo-env/bin
+export SAM3_CHECKPOINT_PATH=/path/to/sam3.pt
 export WORLD_RUA_RUNTIME="$PWD/runtime"
 cp configs/robodojo11.example.json configs/batch.local.json
 worldrua doctor configs/batch.local.json
 worldrua run configs/batch.local.json --detach
 worldrua dashboard runs/robodojo11 --port 5191
 ```
+
+SAM3 权重下载、Chromium 系统库及仿真环境配置见[环境准备](docs/SETUP.md)；三个 `/path/to/…` 必须替换为实际路径。`doctor` 检查依赖、CUDA、任务布局和浏览器渲染，通过后再运行；模型权限与完整仿真启动仍需在目标机器确认。
 
 默认三张 L20、每卡两个样本，共六路并行。服务器本地查看 `http://127.0.0.1:5191/`，远程访问需 SSH 转发。模型断连会保留存活的仿真器续跑；队列进程退出后执行 `worldrua resume runs/robodojo11 --detach`。仿真器已死亡则不能原地恢复，见[续跑说明](docs/RECOVERY.md)。
 
